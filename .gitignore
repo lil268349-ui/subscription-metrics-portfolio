@@ -1,0 +1,5 @@
+# 真实数据形状底稿——严禁进公开仓库
+sim_*.csv
+# 临时预览产物
+_dark_preview.html
+*.png
