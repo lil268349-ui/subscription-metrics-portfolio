@@ -93,6 +93,20 @@
   .tile .d .up { color:var(--good); font-weight:600; }
   .tile svg { display:block; margin-top:12px; width:100%; height:38px; }
 
+  /* ---------- v5 业务线 Tab（导航栏内联，全局唯一 tab 系统） ---------- */
+  .navbar a[data-tab] { padding:5px 13px; border-radius:999px; font-weight:600; transition:all .2s; }
+  .navbar a[data-tab]:hover { color:var(--ink-1); }
+  .navbar a[data-tab][aria-selected="true"] { color:#fff;
+    background:linear-gradient(92deg,var(--s1),var(--s3)); box-shadow:0 6px 18px -8px var(--glow); }
+  :root[data-theme="light"] .navbar a[data-tab][aria-selected="true"] { color:#fff; }
+  .kchips { display:flex; gap:10px; flex-wrap:wrap; margin:0 0 12px; }
+  .kchips .kc { display:flex; align-items:baseline; gap:7px; padding:7px 12px;
+    border:1px solid var(--glass-bd); background:var(--glass); border-radius:9px;
+    font-size:12px; color:var(--ink-3); }
+  .kchips .kc b { font-size:16px; font-weight:650; color:var(--ink-1); font-variant-numeric:tabular-nums; }
+  .kchips .kc b.pos { color:var(--s3); }
+  .kchips .kc b.neg { color:var(--s2); }
+
   /* ---------- v4.2 图下统计条 + 紧凑明细表 ---------- */
   .cstats { display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-3);
     margin:2px 0 4px; font-variant-numeric:tabular-nums; }
@@ -151,6 +165,7 @@
   @media (max-width:1340px){ .rail { display:none; } }
 
   /* ---------- 滚动渐显 ---------- */
+  [hidden] { display:none !important; }
   .rv { opacity:0; transform:translateY(16px);
     transition:opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1); }
   .rv.on { opacity:1; transform:none; }
@@ -315,7 +330,7 @@
   </header>
 
   <div class="navbar"><div class="row">
-    <a href="#revenue">收入概览</a><a href="#subroi">双轨 ROI 对照</a><a href="#cost">购买成本</a><a href="#alloc">分摊与质量</a>
+    <a href="#top" data-tab="all" aria-selected="true">总览</a><a href="#subtab" data-tab="sub">订阅线 ROI</a><a href="#ptab" data-tab="buy">购买积分</a><a href="#alloc" data-tab="cost">成本与质量</a>
     <span class="spacer"></span>
     <div class="seg" role="group" aria-label="时间范围">
       <button data-win="all" aria-pressed="true">全部窗口</button>
@@ -325,6 +340,8 @@
     <button class="iconbtn" id="themeBtn" title="切换深浅色">◐</button>
   </div></div>
 
+
+  <div id="ovwrap">
   <div class="kpis rv" id="kpis"></div>
   <div class="card mini rv" id="miniT"><h4>近 7 日明细（仿真）</h4><div id="miniTb"></div></div>
 
@@ -336,6 +353,7 @@
       <div class="card"><h4>每日新增付费会员</h4><p class="sub">会员系统 · 去重人数</p><div id="c_mem"></div><details class="tbl" id="t_mem"></details></div>
     </div>
   </section>
+  </div>
 
   <section id="subroi" class="rv">
     <div class="sec-head"><span class="sec-no">02</span><h2>双轨 ROI 对照</h2></div>
@@ -347,8 +365,29 @@
     </div>
   </section>
 
-  <section id="cost" class="rv">
-    <div class="sec-head"><span class="sec-no">03</span><h2>购买成本</h2></div>
+  <section id="subtab" class="rv" hidden>
+    <div class="sec-head"><h2>订阅线 ROI</h2></div>
+    <p class="sec-note">订阅线单线深挖：上线以来毛利逐日走势、期末 MRR 与收入成本对照。分摊成本含订阅积分所摊的模型调用、渲染与分成。</p>
+    <div class="kchips" id="subChips"></div>
+    <div class="grid2">
+      <div class="card"><h4>订阅毛利 · 逐日</h4><p class="sub">订阅收入 − 订阅分摊成本（上线以来）</p><div id="c_subprofit"></div></div>
+      <div class="card"><h4>订阅期末 MRR</h4><p class="sub">月度经常性收入走势</p><div id="c_submrr"></div></div>
+    </div>
+    <details class="tbl" id="t_subprofit"></details>
+  </section>
+
+  <section id="ptab" class="rv" hidden>
+    <div class="sec-head"><h2>购买积分线</h2></div>
+    <p class="sec-note">积分购买单线深挖：等效金额（按积分面值折算，非现金收入）与分摊成本对照、单位积分成本与消耗构成。</p>
+    <div class="kchips" id="buyChips"></div>
+    <div class="grid2">
+      <div class="card"><h4>购买等效金额 · 逐日</h4><p class="sub">当日购买积分消耗 × 面值 100</p><div id="c_buyeq"></div></div>
+      <div class="card"><h4>购买分摊成本 · 逐日</h4><p class="sub">分摊到购买桶的成本</p><div id="c_buycost"></div></div>
+    </div>
+  </section>
+
+  <section id="cost" class="rv" hidden>
+    <div class="sec-head"><h2>购买成本</h2></div>
     <p class="sec-note">左图：每 100 积分分摊成本的指数走势（区间首日 = 100），用于监控定价与成本的匹配度。右图：购买、订阅、赠送三桶的周度消耗构成——分摊比例的来源。</p>
     <div class="grid2">
       <div class="card"><h4>单位积分成本指数</h4><p class="sub">每 100 积分分摊成本 · 区间首日 = 100</p><div id="c_unit"></div><details class="tbl" id="t_unit"></details></div>
@@ -366,8 +405,9 @@
     </div>
   </section>
 
-  <section id="alloc" class="rv">
-    <div class="sec-head"><span class="sec-no">04</span><h2>成本分摊与数据质量</h2></div>
+  <section id="alloc" class="rv" hidden>
+    <div class="card" style="margin-bottom:12px"><h4>成本四来源 · 日级堆叠</h4><p class="sub">模型网关调用 / 3D 渲染 / 创作者分成 / 模板与案例分成</p><div id="c_srcstack"></div><div id="t_srcstack"></div></div>
+    <div class="sec-head"><h2>成本分摊与数据质量</h2></div>
     <p class="sec-note">成本从四类来源按各业务桶当日消耗占比分摊的全景流向——赠送积分无直接收入，其分摊成本为平台自担的增长投入。发布质量逐日留痕：校验未通过的日期不发布成本指标，看板上不留灰色地带。</p>
     <div class="card"><h4>成本来源 → 业务桶 · 分摊全景</h4><p class="sub">悬浮查看每条流量的金额与占比 · 金额为仿真口径</p><div id="c_sankey" class="sx"></div><details class="tbl" id="t_sankey"></details></div>
     <div class="card" style="margin-top:16px"><h4>逐日发布质量</h4><p class="sub">每个格子是一天 · 悬浮查看当日校验说明</p><div id="c_qual"></div><p class="qnote">复核与补发全量留痕：进入看板的每一个数字，都能回溯到当日的校验记录与订单核对明细。</p></div>
@@ -687,10 +727,122 @@ function colChart(sel, cfg) {
     [{ name: cfg.name, color: cfg.color, values: cfg.values }], cfg.tipFmt, cfg.head || '');
 }
 
+/* ---------- v5 堆叠面积（成本四来源日级） ---------- */
+function stackArea(sel, cfg) {
+  const box = $(sel); box.textContent = '';
+  const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 58, b: 26, l: 46 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b, n = cfg.dates.length;
+  const vis = cfg.key ? (HID[cfg.key] || cfg.series.map(() => false)).map(Boolean)
+                      : cfg.series.map(() => false);
+  const cum = cfg.series.map(() => Array(n).fill(0));
+  let run = Array(n).fill(0);
+  cfg.series.forEach((s, si) => { run = run.map((v, i) => v + s.values[i]); cum[si] = run.slice(); });
+  const ticks = niceTicks(Math.max(1, ...run), 4);
+  const yMax = ticks[ticks.length - 1];
+  const X = i => m.l + (n === 1 ? iw / 2 : i * iw / (n - 1));
+  const Y = v => m.t + ih - v / yMax * ih;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', style: 'display:block' });
+  ticks.forEach(v => {
+    svg.append(el('line', { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: v === 0 ? C.axis : C.grid, 'stroke-width': 1 }));
+    const t = el('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: C.ink3 });
+    t.textContent = cfg.tickFmt ? cfg.tickFmt(v) : v; svg.append(t);
+  });
+  const nt = Math.min(6, n);
+  for (let k = 0; k < nt; k++) {
+    const i = Math.round(k * (n - 1) / (nt - 1 || 1));
+    const t = el('text', { x: X(i), y: H - 8, 'text-anchor': 'middle', 'font-size': 12, fill: C.ink3 });
+    t.textContent = md(cfg.dates[i]); svg.append(t);
+  }
+  const defs = el('defs', {}); svg.append(defs);
+  const tops = [];
+  cfg.series.forEach((s, si) => {
+    if (vis[si]) return;
+    const below = si === 0 ? Array(n).fill(0) : cum[si - 1];
+    const gid = `sa-${(cfg.key || sel.replace(/[^a-zA-Z0-9]/g, ''))}-${si}`;
+    const grad = el('linearGradient', { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
+    grad.append(el('stop', { offset: '0%', 'stop-color': s.color, 'stop-opacity': .38 }));
+    grad.append(el('stop', { offset: '100%', 'stop-color': s.color, 'stop-opacity': .07 }));
+    defs.append(grad);
+    const top = cum[si].map((v, i) => `L ${X(i)} ${Y(v)}`).join(' ');
+    const bot = below.map((v, i) => `L ${X(n - 1 - i)} ${Y(below[n - 1 - i])}`).join(' ');
+    svg.append(el('path', { d: `M ${X(0)} ${Y(below[0])} ${top} ${bot} Z`, fill: `url(#${gid})` }));
+    const lp = el('path', { d: cum[si].map((v, i) => (i ? 'L' : 'M') + ` ${X(i)} ${Y(v)}`).join(' '),
+      fill: 'none', stroke: s.color, 'stroke-width': 1.8, 'stroke-linejoin': 'round' });
+    svg.append(lp); tops.push({ lp, si });
+  });
+  const cross = el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, visibility: 'hidden' });
+  svg.append(cross);
+  const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
+  hit.style.cursor = 'crosshair'; hit.tabIndex = 0;
+  hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '堆叠面积图');
+  svg.append(hit);
+  let idx = n - 1;
+  function show(i, cx, cy) {
+    idx = i;
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i));
+    cross.setAttribute('visibility', 'visible');
+    const tt = tipDate(cfg.dates[i]);
+    let tot = 0;
+    cfg.series.forEach((s, si) => {
+      if (vis[si]) return; tot += s.values[i];
+      tt.append(tipRow(s.color, money(s.values[i]), s.name));
+    });
+    tt.append(tipRow(C.ink3, money(tot), '合计'));
+    tipShow(tt, cx, cy);
+  }
+  hit.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect(), sx = (e.clientX - r.left) * W / r.width;
+    const i = Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+    show(i, e.clientX, e.clientY);
+  });
+  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tipHide(); });
+  hit.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
+    if (e.key === 'Escape') { cross.setAttribute('visibility', 'hidden'); tipHide(); }
+  });
+  if (cfg.series.length >= 2) {
+    const lg = div('legend');
+    cfg.series.forEach((s, si) => {
+      const li = div('li'); li.setAttribute('role', 'button'); li.tabIndex = 0;
+      li.title = '点击显示 / 隐藏该序列';
+      const k = div(); k.className = 'ln'; k.style.background = s.color;
+      const sp = document.createElement('span'); sp.textContent = s.name;
+      li.append(k, sp);
+      if (vis[si]) { li.style.opacity = .38; sp.style.textDecoration = 'line-through'; }
+      const tog = () => {
+        const arr = HID[cfg.key] || (HID[cfg.key] = cfg.series.map(() => false));
+        const nv = arr.map((v, i2) => i2 === si ? !v : v);
+        if (nv.every(x => x)) return;
+        arr[si] = !arr[si];
+        (cfg.rerender || (() => renderAll(false)))();
+      };
+      li.addEventListener('click', tog);
+      li.addEventListener('keydown', e2 => { if (e2.key === 'Enter' || e2.key === ' ') { e2.preventDefault(); tog(); } });
+      lg.append(li);
+    });
+    box.append(lg);
+  }
+  box.append(svg);
+  if (cfg.stats !== false) box.append(statChips(run, cfg.tickFmt));
+  if (ANIM && !RM) tops.forEach((o, i) => drawIn(o.lp, 100 + i * 140));
+  addTable(sel.replace('#c_', '#t_'), cfg.dates, cfg.series, v => money(v), cfg.head || '日期');
+}
+
+/* ---------- v5 tab 内 KPI chips 行 ---------- */
+function chipRow(sel, items) {
+  const w = $(sel); if (!w) return; w.textContent = '';
+  items.forEach(([k, v, cls]) => {
+    const c = div('kc'); const lab = document.createElement('span'); lab.textContent = k;
+    const b = document.createElement('b'); if (cls) b.className = cls; b.textContent = v;
+    c.append(lab, b); w.append(c);
+  });
+}
+
 /* ---------- 堆叠柱（三桶周度构成） ---------- */
 function stackChart(sel, cfg) {
   const box = $(sel); box.textContent = '';
-  const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 12, b: 26, l: 46 };
+  const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 30, b: 26, l: 46 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b, n = cfg.buckets.length;
   const totals = cfg.buckets.map(b => b.parts.reduce((a, p) => a + p.v, 0));
   const ticks = niceTicks(Math.max(...totals), 4);
@@ -1211,6 +1363,57 @@ function renderAll(animate) {
   const sdS = sliceDays(DATA.src_daily, WIN);
   sankeyChart('#c_sankey', aggFlows(cost, sdS));
   qualityStrip('#c_qual', sliceDays(DATA.quality, WIN));
+
+  /* v5 成本四来源日级堆叠 */
+  stackArea('#c_srcstack', { h: 240, dates: sdS.map(r => r.d), key: 'srcstack',
+    name: '成本四来源堆叠',
+    series: DATA.src_names.map((nm, i) => ({ name: nm, color: ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s5)'][i],
+      values: sdS.map(r => r.s[i]) })) });
+
+  /* v5 订阅线 tab：毛利逐日 + MRR + chips */
+  const sbD = cost.filter(c => c.d >= LAUNCH);
+  const sbR = sbD.map(c => c.s_cost ? c2rev(costAll, c.d) : 0);
+  const sbC = sbD.map(c => c.s_cost);
+  const sbP = sbD.map((c, i) => sbR[i] - c.s_cost);
+  const sumR = sbR.reduce((a, b) => a + b, 0), sumC = sbC.reduce((a, b) => a + b, 0);
+  const sumP = sbP.reduce((a, b) => a + b, 0);
+  chipRow('#subChips', [
+    ['订阅收入', money(sumR), ''], ['分摊成本', money(sumC), ''],
+    ['收入成本比', (sumR / Math.max(1, sumC)).toFixed(2) + '×', sumR >= sumC ? 'pos' : 'neg'],
+    ['毛利合计', money(sumP), sumP >= 0 ? 'pos' : 'neg'],
+    ['期末 MRR', money(mem[mem.length - 1].mrr), ''],
+    ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length), ''] ]);
+  const ma7 = sbP.map((v, i) => { const w = sbP.slice(Math.max(0, i - 6), i + 1);
+    return w.reduce((a, b) => a + b, 0) / w.length; });
+  lineChart('#c_subprofit', { h: 260, dates: sbD.map(c => c.d), name: '订阅毛利',
+    area: false, color: C.s3, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+    tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
+    series: [{ name: '订阅毛利（仿真）', color: C.s3, values: sbP },
+             { name: '7日均线', color: 'var(--s1)', values: ma7 }] });
+  lineChart('#c_submrr', { h: 260, dates: mem.map(m2 => m2.d), name: '期末 MRR',
+    stats: false, area: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+    tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
+    series: [{ name: '期末 MRR', color: C.s1, values: mem.map(m2 => m2.mrr) }] });
+
+  /* v5 购买积分 tab：等效金额 + 分摊成本 + chips */
+  const bEq = cost.map(c => c.p_cr * 100);
+  const bCs = cost.map(c => c.p_cost);
+  const sumBE = bEq.reduce((a, b) => a + b, 0), sumBC = bCs.reduce((a, b) => a + b, 0);
+  const sumPC = cost.reduce((a, c) => a + c.p_cr, 0);
+  chipRow('#buyChips', [
+    ['等效金额', money(sumBE), ''], ['分摊成本', money(sumBC), ''],
+    ['收入成本比', (sumBE / Math.max(1, sumBC)).toFixed(2) + '×', sumBE >= sumBC ? 'pos' : 'neg'],
+    ['单位积分成本', '$' + (sumBC / Math.max(1, sumPC)).toFixed(2), ''],
+    ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length), ''] ]);
+  lineChart('#c_buyeq', { h: 260, dates: cost.map(c => c.d), name: '购买等效金额',
+    area: true, color: C.s3, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+    tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
+    series: [{ name: '购买等效金额（仿真）', color: C.s3, values: bEq }] });
+  lineChart('#c_buycost', { h: 260, dates: cost.map(c => c.d), name: '购买分摊成本',
+    area: true, color: C.s2, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+    tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
+    series: [{ name: '购买分摊成本（仿真）', color: C.s2, values: bCs }] });
+
   CURCOST = cost;
   renderDrill(cost);
 }
@@ -1300,12 +1503,37 @@ const io = new IntersectionObserver(es => es.forEach(e => {
 }), { threshold: .08 });
 document.querySelectorAll('.rv').forEach(n => io.observe(n));
 
-const SECS = [['top', '总览'], ['revenue', '收入概览'], ['subroi', '双轨 ROI 对照'],
-  ['cost', '购买成本'], ['alloc', '分摊与质量']];
+/* ---------- v5 业务线 Tab：总览 / 订阅线 / 购买积分 / 成本与质量 ---------- */
+const TABS = [
+  { key: 'all',  label: '总览',       secs: ['ovwrap', 'subroi'] },
+  { key: 'sub',  label: '订阅线 ROI', secs: ['subtab'] },
+  { key: 'buy',  label: '购买积分',   secs: ['ptab'] },
+  { key: 'cost', label: '成本与质量', secs: ['cost', 'alloc'] } ];
+let CURTAB = 'all';
+function applyTab(key, jump) {
+  CURTAB = key;
+  const t = TABS.find(x => x.key === key);
+  TABS.forEach(x => x.secs.forEach(id => {
+    const n2 = document.getElementById(id);
+    if (n2) n2.hidden = !t.secs.includes(id);
+  }));
+  document.querySelectorAll('.navbar a[data-tab], #rail a').forEach(b =>
+    b.setAttribute('aria-selected', String(b.dataset.tab === key)));
+  renderAll(false);
+  spy();
+  if (jump) {
+    const first = document.getElementById(t.secs[0]);
+    if (first) scrollTo({ top: first.getBoundingClientRect().top + scrollY - 64, behavior: RM ? 'auto' : 'smooth' });
+  }
+}
+document.querySelectorAll('.navbar a[data-tab]').forEach(a => {
+  a.addEventListener('click', e => { e.preventDefault(); applyTab(a.dataset.tab, true); });
+});
 const rail = $('#rail');
-SECS.forEach(([id, t]) => {
-  const a = document.createElement('a'); a.href = '#' + id; a.title = t;
-  const s = document.createElement('span'); s.textContent = t;
+TABS.forEach(t => {
+  const a = document.createElement('a'); a.href = '#' + t.secs[0]; a.title = t.label; a.dataset.tab = t.key;
+  const s = document.createElement('span'); s.textContent = t.label;
+  a.addEventListener('click', e => { e.preventDefault(); applyTab(t.key, true); });
   a.append(s); rail.append(a);
 });
 const prog = $('#prog');
@@ -1313,13 +1541,8 @@ function spy() {
   const h = document.documentElement;
   const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
   prog.style.width = (p * 100).toFixed(2) + '%';
-  let cur = SECS[0][0];
-  SECS.forEach(([id]) => {
-    const n = document.getElementById(id);
-    if (n && n.getBoundingClientRect().top <= 170) cur = id;
-  });
-  rail.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
-  document.querySelectorAll('.navbar a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+  document.querySelectorAll('#rail a').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === CURTAB));
 }
 addEventListener('scroll', spy, { passive: true });
 
