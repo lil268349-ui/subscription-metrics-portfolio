@@ -31,7 +31,7 @@ HTML = r"""<!doctype html>
     :root:where(:not([data-theme="light"])) {
       color-scheme: dark;
       --surface-1:#1a1a19; --page:#0d0d0d;
-      --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+      --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#98968f;
       --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
       --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s5:#d55181;
       --good:#0ca30c;
@@ -41,7 +41,7 @@ HTML = r"""<!doctype html>
   :root[data-theme="dark"] {
     color-scheme: dark;
     --surface-1:#1a1a19; --page:#0d0d0d;
-    --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#98968f;
     --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s5:#d55181;
     --good:#0ca30c;
@@ -183,15 +183,123 @@ HTML = r"""<!doctype html>
   .sx { overflow-x:auto; margin-top:4px; }
   .sx svg { min-width:760px; display:block; }
   .navbar a.active { color:var(--ink-1); font-weight:600; box-shadow:inset 0 -2px var(--s1); }
+
+  /* ================= v2 科技感层 ================= */
+  :root {
+    --glass:rgba(252,252,251,.72); --glass-bd:rgba(11,11,11,.12);
+    --glow:rgba(42,120,214,.16); --glow2:rgba(27,175,122,.13); --gridline:rgba(11,11,11,.045);
+    --lift:rgba(11,11,11,.38); --edge:rgba(255,255,255,.65);
+  }
+  :root[data-theme="dark"] {
+    --glass:rgba(26,26,25,.58); --glass-bd:rgba(255,255,255,.10);
+    --glow:rgba(57,135,229,.17); --glow2:rgba(25,158,112,.13); --gridline:rgba(255,255,255,.05);
+    --lift:rgba(0,0,0,.55); --edge:rgba(255,255,255,.09);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --glass:rgba(26,26,25,.58); --glass-bd:rgba(255,255,255,.10);
+      --glow:rgba(57,135,229,.17); --glow2:rgba(25,158,112,.13); --gridline:rgba(255,255,255,.05);
+      --lift:rgba(0,0,0,.55); --edge:rgba(255,255,255,.09);
+    }
+  }
+
+  /* 页面底纹：双色微光 + 渐隐网格（仅装饰，无障碍不可见） */
+  body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:
+      radial-gradient(720px 420px at 12% -6%, var(--glow), transparent 70%),
+      radial-gradient(680px 460px at 96% 2%, var(--glow2), transparent 72%),
+      linear-gradient(var(--gridline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--gridline) 1px, transparent 1px);
+    background-size:auto,auto,44px 44px,44px 44px;
+    -webkit-mask-image:radial-gradient(1300px 900px at 50% 0%, #000 0%, transparent 78%);
+    mask-image:radial-gradient(1300px 900px at 50% 0%, #000 0%, transparent 78%);
+  }
+
+  /* 玻璃拟态卡片：微光投影 + 顶缘高光，悬浮感在浅色下也能读出 */
+  .card, .tile, .intro, .disclaimer, .seg, .iconbtn {
+    background:var(--glass);
+    -webkit-backdrop-filter:blur(14px) saturate(1.15); backdrop-filter:blur(14px) saturate(1.15);
+    border-color:var(--glass-bd);
+    box-shadow:0 10px 30px -24px var(--lift), inset 0 1px 0 var(--edge);
+  }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+    .card, .tile, .intro, .disclaimer, .seg, .iconbtn { background:var(--surface-1); }
+  }
+
+  /* 玻璃导航条 */
+  .navbar { background:transparent; border-bottom-color:transparent; }
+  .navbar .row { background:var(--glass); border:1px solid var(--glass-bd); border-radius:14px;
+    padding:9px 14px; margin:0 0 4px;
+    -webkit-backdrop-filter:blur(14px) saturate(1.15); backdrop-filter:blur(14px) saturate(1.15);
+    box-shadow:0 12px 34px -24px var(--lift), inset 0 1px 0 var(--edge); }
+
+  /* 头部：胶囊徽标 + 渐变大标题 */
+  .hero { padding:84px 0 8px; }
+  .kicker { display:inline-flex; align-items:center; gap:9px; font-size:12.5px; letter-spacing:.16em;
+    color:var(--ink-2); font-weight:600; border:1px solid var(--glass-bd); background:var(--glass);
+    padding:7px 15px; border-radius:999px; }
+  .kicker::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--s3);
+    animation:pulse 2.6s ease-out infinite; }
+  @keyframes pulse { 0% { box-shadow:0 0 0 0 var(--glow2); } 70% { box-shadow:0 0 0 10px transparent; } 100% { box-shadow:0 0 0 0 transparent; } }
+  h1 { font-size:46px; letter-spacing:.005em; margin:16px 0 8px; }
+  @supports ((-webkit-background-clip:text) or (background-clip:text)) {
+    h1 { width:fit-content; background:linear-gradient(92deg, var(--ink-1) 0%, var(--s1) 55%, var(--s3) 100%);
+      -webkit-background-clip:text; background-clip:text; color:transparent; }
+  }
+  .herosub { letter-spacing:.02em; }
+  @media (prefers-reduced-motion: reduce) { .kicker::before { animation:none; } }
+
+  /* 区块标题：编号章 + 渐隐细线 */
+  .sec-head { align-items:center; }
+  .sec-no { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:32px;
+    padding:0 6px; border-radius:9px; border:1px solid var(--glass-bd); background:var(--glass);
+    color:var(--ink-1); letter-spacing:.08em; }
+  .sec-head::after { content:""; flex:1; height:1px; margin-left:10px;
+    background:linear-gradient(90deg, var(--grid), transparent); }
+
+  /* KPI 卡片悬浮 */
+  .tile { transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
+  .tile:hover { transform:translateY(-3px);
+    box-shadow:0 14px 32px -16px var(--glow), 0 0 0 1px var(--glass-bd); }
+  @media (prefers-reduced-motion: reduce) { .tile { transition:none; } .tile:hover { transform:none; } }
+
+  /* 钻取播放器 */
+  .pctrl { display:flex; gap:6px; align-items:center; flex:none; }
+  .pbtn { border:1px solid var(--glass-bd); background:var(--surface-1); color:var(--ink-2);
+    border-radius:8px; font-size:12.5px; line-height:1; padding:7px 11px; cursor:pointer;
+    transition:all .2s; font-variant-numeric:tabular-nums; }
+  .pbtn:hover { color:var(--ink-1); border-color:var(--s1); box-shadow:0 0 0 1px var(--glow), 0 6px 16px -8px var(--glow); }
+  .pbtn[aria-pressed="true"] { color:var(--ink-1); background:var(--glow); border-color:var(--s1); }
+  .pbtn:focus-visible { outline:2px solid var(--s1); outline-offset:1px; }
+
+  /* 图例可点击序列 */
+  .legend .li[role="button"] { cursor:pointer; border-radius:6px; padding:2px 4px; margin:-2px -4px; transition:opacity .2s; }
+  .legend .li[role="button"]:hover { color:var(--ink-1); background:var(--glow); }
+  .legend .li[role="button"]:focus-visible { outline:2px solid var(--s1); outline-offset:1px; }
+
+  /* 回到顶部 */
+  #totop { position:fixed; right:22px; bottom:22px; z-index:40; width:42px; height:42px; border-radius:50%;
+    border:1px solid var(--glass-bd); background:var(--glass); color:var(--ink-2); font-size:16px; cursor:pointer;
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    opacity:0; pointer-events:none; transform:translateY(8px); transition:all .3s; }
+  #totop.on { opacity:1; pointer-events:auto; transform:none; }
+  #totop:hover { color:var(--ink-1); box-shadow:0 10px 26px -10px var(--glow); }
+
+  /* 细滚动条 */
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:var(--axis); border-radius:5px; border:2px solid var(--page); }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb:hover { background:var(--ink-3); }
 </style>
 </head>
 <body>
 <div id="prog"></div>
 <nav class="rail" id="rail" aria-label="章节导航"></nav>
+<button id="totop" title="回到顶部" aria-label="回到顶部">↑</button>
 <div class="wrap">
 
   <header class="hero" id="top">
-    <p class="kicker">数据产品作品集</p>
+    <p class="kicker">数据产品作品集 · PORTFOLIO</p>
     <h1>订阅业务收入成本监控看板</h1>
     <p class="herosub">某海外 AI 创作平台 · 订阅会员与积分购买双轨商业化 · 数据产品经理独立建设</p>
 
@@ -253,7 +361,12 @@ HTML = r"""<!doctype html>
     </div>
     <div class="card" style="margin-top:16px">
       <div class="dhead"><div><h4>单位成本构成钻取</h4>
-        <p class="sub">点击上方「单位积分成本指数」任意日期，查看当日单位成本的模型级拆解 · <span id="wdate" class="whint"></span></p></div></div>
+        <p class="sub">点击上方「单位积分成本指数」任意日期，或用播放器逐日回放 · <span id="wdate" class="whint"></span></p></div>
+        <div class="pctrl" role="group" aria-label="逐日播放器">
+          <button class="pbtn" id="pPrev" title="前一日">◀</button>
+          <button class="pbtn" id="pNext" title="后一日">▶</button>
+          <button class="pbtn" id="pPlay" title="自动播放" aria-pressed="false">⏵ 播放</button>
+        </div></div>
       <div id="c_wf"></div><details class="tbl" id="t_wf"></details>
     </div>
   </section>
@@ -269,7 +382,7 @@ HTML = r"""<!doctype html>
     <h4>方法注记</h4>
     <p>每日已纳入成本（模型网关调用、3D 渲染、创作者分成）乘以各桶消耗占比得到分摊成本；跨日只求和。单位成本 = 区间分摊成本 ÷ 区间消耗，不做日均的简单平均。数据校验未通过的日期不发布成本指标；报表数字与订单流水逐笔核对。</p>
     <p class="fine">本页数据为仿真数据，仅用于作品展示 · 图表与代码可复现 · 生成器与数据形状见仓库<br>
-    交互：深浅主题 · 时间窗口筛选 · 悬浮十字线读数 · 单位成本按日钻取 · 冲积分摊全景 · 每图数据表孪生 · 键盘 ←/→/Enter</p>
+    交互：深浅主题 · 时间窗口筛选 · 悬浮十字线读数 · 图例点击显隐 · 单位成本按日钻取与逐日播放 · 冲积分摊全景 · 每图数据表孪生 · 键盘 ←/→/Enter</p>
   </footer>
 </div>
 
@@ -327,6 +440,10 @@ function legendRow(items) {
 /* ---------- 全局状态与动效 ---------- */
 let WIN = 'all', PICKD = null, ANIM = true;
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HID = {};                 /* 图例显隐状态：{ 图表key: [序列是否隐藏] } */
+let PLAY = null;                /* 钻取自动播放定时器 */
+let CURCOST = null;             /* 当前窗口的成本切片（播放器用） */
+let __unitSync = null;          /* 单位成本折线的选中标记同步器 */
 
 function drawIn(p, delay) {
   const L = p.getTotalLength();
@@ -375,8 +492,10 @@ function lineChart(sel, cfg) {
   const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 58, b: 26, l: 46 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b;
   const n = cfg.dates.length;
-  const all = cfg.series.flatMap(s => s.values);
-  const ticks = niceTicks(Math.max(...all), 4);
+  const vis = cfg.key ? (HID[cfg.key] || cfg.series.map(() => false)).map(Boolean)
+                      : cfg.series.map(() => false);
+  const all = cfg.series.flatMap((s, i) => vis[i] ? [] : s.values);
+  const ticks = niceTicks(Math.max(1, ...all, 0), 4);
   const yMax = ticks[ticks.length - 1];
   const X = i => m.l + (n === 1 ? iw / 2 : i * iw / (n - 1));
   const Y = v => m.t + ih - v / yMax * ih;
@@ -403,6 +522,7 @@ function lineChart(sel, cfg) {
 
   const lps = [];
   cfg.series.forEach((s, si) => {
+    if (vis[si]) return;  /* 图例隐藏的序列不绘制；颜色跟随实体，不重涂幸存者 */
     const pts = s.values.map((v, i) => [X(i), Y(v)]);
     if (cfg.area && si === 0) {
       const d = [`M ${pts[0][0]} ${Y(0)}`].concat(pts.map(p => `L ${p[0]} ${p[1]}`),
@@ -419,13 +539,23 @@ function lineChart(sel, cfg) {
     svg.append(t);
   });
 
-  /* 选中标记（钻取联动） */
+  /* 选中标记（钻取联动；播放器可通过 __unitSync 平移它，不必整图重绘） */
   if (cfg.pick) {
     const pi = cfg.dates.indexOf(cfg.pick);
+    const s0 = cfg.series.find((s, i) => !vis[i]) || cfg.series[0];
     if (pi >= 0) {
-      const s0 = cfg.series[0];
-      svg.append(el('circle', { cx: X(pi), cy: Y(s0.values[pi]), r: 7, fill: 'none', stroke: C.s2, 'stroke-width': 2 }));
-      svg.append(el('circle', { cx: X(pi), cy: Y(s0.values[pi]), r: 2.5, fill: C.s2 }));
+      const mg = el('g', {});
+      const cx0 = X(pi), cy0 = Y(s0.values[pi]);
+      mg.append(el('circle', { cx: 0, cy: 0, r: 7, fill: 'none', stroke: C.s2, 'stroke-width': 2 }));
+      mg.append(el('circle', { cx: 0, cy: 0, r: 2.5, fill: C.s2 }));
+      mg.setAttribute('transform', `translate(${cx0},${cy0})`);
+      svg.append(mg);
+      if (cfg.key === 'unit') {
+        __unitSync = d => {
+          const j = cfg.dates.indexOf(d);
+          if (j >= 0) mg.setAttribute('transform', `translate(${X(j)},${Y(s0.values[j])})`);
+        };
+      }
     }
   }
 
@@ -436,7 +566,28 @@ function lineChart(sel, cfg) {
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '折线图');
   svg.append(hit);
 
-  if (cfg.series.length >= 2) box.append(legendRow(cfg.series.map(s => ({ name: s.name, color: s.color }))));
+  if (cfg.series.length >= 2) {
+    const lg = div('legend');
+    cfg.series.forEach((s, si) => {
+      const li = div('li'); li.setAttribute('role', 'button'); li.tabIndex = 0;
+      li.title = '点击显示 / 隐藏该序列';
+      const k = div(); k.className = 'ln'; k.style.background = s.color;
+      const sp = document.createElement('span'); sp.textContent = s.name;
+      li.append(k, sp);
+      if (vis[si]) { li.style.opacity = .38; sp.style.textDecoration = 'line-through'; }
+      const tog = () => {
+        const arr = HID[cfg.key] || (HID[cfg.key] = cfg.series.map(() => false));
+        const nv = arr.map((v, i2) => i2 === si ? !v : v);
+        if (nv.every(x => x)) return;  /* 不允许隐藏全部序列 */
+        arr[si] = !arr[si];
+        (cfg.rerender || (() => renderAll(false)))();
+      };
+      li.addEventListener('click', tog);
+      li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tog(); } });
+      lg.append(li);
+    });
+    box.append(lg);
+  }
   box.append(svg);
   if (ANIM && !RM) lps.forEach((p, i) => drawIn(p, 120 + i * 160));
 
@@ -446,7 +597,10 @@ function lineChart(sel, cfg) {
     cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i));
     cross.setAttribute('visibility', 'visible');
     const tt = tipDate(cfg.dates[i]);
-    cfg.series.forEach(s => tt.append(tipRow(s.color, (cfg.tipFmt || (v => Math.round(v)))(s.values[i]), s.name)));
+    cfg.series.forEach((s, si) => {
+      if (!vis[si]) return;
+      tt.append(tipRow(s.color, (cfg.tipFmt || (v => Math.round(v)))(s.values[i]), s.name));
+    });
     tipShow(tt, cx, cy);
   }
   hit.addEventListener('pointermove', e => {
@@ -840,15 +994,20 @@ function addTableStack(sel, cfg) {
   t.append(tb); w.append(t); d.append(w); box.append(d);
 }
 
-/* ---------- 迷你走势 ---------- */
+/* ---------- 迷你走势（12 点重采样 · 弱化色描线 + 当期强调点） ---------- */
 function spark(vals, color) {
-  const W = 120, H = 26, mn = Math.min(...vals), mx = Math.max(...vals);
-  const X = i => 2 + i * (W - 4) / (vals.length - 1);
+  const M = 12;
+  const vs = vals.length > M
+    ? Array.from({ length: M }, (_, i) => vals[Math.round(i * (vals.length - 1) / (M - 1))]) : vals;
+  const W = 120, H = 26, mn = Math.min(...vs), mx = Math.max(...vs);
+  const X = i => 2 + i * (W - 4) / (vs.length - 1);
   const Y = v => 3 + (H - 6) * (1 - (v - mn) / ((mx - mn) || 1));
-  const s = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
-  s.append(el('path', { d: vals.map((v, i) => (i ? 'L' : 'M') + ` ${X(i)} ${Y(v)}`).join(' '),
-    fill: 'none', stroke: 'var(--grid)', 'stroke-width': 2, 'stroke-linecap': 'round' }));
-  s.append(el('circle', { cx: X(vals.length - 1), cy: Y(vals[vals.length - 1]), r: 4, fill: color, stroke: C.surface, 'stroke-width': 2 }));
+  const s = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, 'aria-hidden': 'true' });
+  s.append(el('path', { d: [`M ${X(0)} ${H - 2}`].concat(vs.map((v, i) => `L ${X(i)} ${Y(v)}`),
+    [`L ${X(vs.length - 1)} ${H - 2}`, 'Z']).join(' '), fill: color, opacity: .08 }));
+  s.append(el('path', { d: vs.map((v, i) => (i ? 'L' : 'M') + ` ${X(i)} ${Y(v)}`).join(' '),
+    fill: 'none', stroke: 'var(--axis)', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  s.append(el('circle', { cx: X(vs.length - 1), cy: Y(vs[vs.length - 1]), r: 4, fill: color, stroke: C.surface, 'stroke-width': 2 }));
   return s;
 }
 
@@ -910,6 +1069,7 @@ function renderKpis(cost, mem) {
 
 function renderAll(animate) {
   ANIM = animate !== false;
+  __unitSync = null;   /* 旧闭包引用旧几何，先清掉；有选中标记时折线图会重新注册 */
   tipHide();
   const costAll = DATA.cost, memAll = DATA.mem;
   const cost = sliceDays(costAll, WIN);
@@ -933,7 +1093,7 @@ function renderAll(animate) {
   const bR = (subRev[bi] || 1), bC = (subCst[bi] || 1);
   lineChart('#c_subroi', { h: 270, dates: subDays.map(c => c.d),
     tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    name: '订阅ROI指数',
+    name: '订阅ROI指数', key: 'subroi', rerender: () => renderAll(false),
     series: [
       { name: '订阅收入指数', color: C.s1, values: subRev.map(v => +(v / bR * 100).toFixed(1)) },
       { name: '订阅分摊成本指数', color: C.s2, values: subCst.map(v => +(v / bC * 100).toFixed(1)) },
@@ -941,15 +1101,15 @@ function renderAll(animate) {
 
   lineChart('#c_proi', { h: 270, dates: cost.map(c => c.d),
     tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    name: '购买ROI指数',
+    name: '购买ROI指数', key: 'proi', rerender: () => renderAll(false),
     series: [
       { name: '购买消耗等效指数', color: C.s3, values: idx(cost.map(c => c.p_cr * 100)) },
       { name: '购买分摊成本指数', color: C.s2, values: idx(cost.map(c => c.p_cost)) },
     ] });
 
-  lineChart('#c_unit', { h: 250, dates: cost.map(c => c.d), name: '单位成本指数',
+  lineChart('#c_unit', { h: 250, dates: cost.map(c => c.d), name: '单位成本指数', key: 'unit',
     area: true, color: C.s1, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    pick: PICKD, onPick: d => { PICKD = (PICKD === d ? null : d); renderAll(false); },
+    pick: PICKD, onPick: d => { stopPlay(); PICKD = (PICKD === d ? null : d); renderAll(false); },
     series: [{ name: '单位积分成本指数', color: C.s1, values: idx(cost.map(c => c.unit_idx)) }] });
 
   /* 三桶周度 */
@@ -970,6 +1130,7 @@ function renderAll(animate) {
   const sdS = sliceDays(DATA.src_daily, WIN);
   sankeyChart('#c_sankey', aggFlows(cost, sdS));
   qualityStrip('#c_qual', sliceDays(DATA.quality, WIN));
+  CURCOST = cost;
   renderDrill(cost);
 }
 function aggFlows(cost, sd) {
@@ -995,6 +1156,38 @@ function renderDrill(cost) {
   waterfall('#c_wf', { parts: up.parts, total, date: d });
   wfTable('#t_wf', up.parts, total);
 }
+
+/* ---------- 钻取逐日播放器 ---------- */
+function stopPlay() {
+  if (!PLAY) return;
+  clearInterval(PLAY); PLAY = null;
+  const b = $('#pPlay'); b.setAttribute('aria-pressed', 'false'); b.textContent = '⏵ 播放';
+}
+function stepDrill(dir) {
+  const ds = CURCOST.map(c => c.d);
+  const i = ds.indexOf(PICKD || ds[ds.length - 1]);
+  const j = Math.max(0, Math.min(ds.length - 1, i + dir));
+  if (j === i) return;
+  PICKD = ds[j];
+  ANIM = true;                    /* 单步小动画；RM 用户自动被 &&RM 关闭 */
+  renderDrill(CURCOST);
+  if (__unitSync) __unitSync(PICKD);
+}
+$('#pPrev').addEventListener('click', () => { stopPlay(); stepDrill(-1); });
+$('#pNext').addEventListener('click', () => { stopPlay(); stepDrill(1); });
+$('#pPlay').addEventListener('click', () => {
+  if (PLAY) { stopPlay(); return; }
+  const ds = CURCOST.map(c => c.d);
+  if ((PICKD || ds[ds.length - 1]) === ds[ds.length - 1]) {  /* 已在末日则从头播 */
+    PICKD = ds[0]; renderDrill(CURCOST); if (__unitSync) __unitSync(PICKD);
+  }
+  const b = $('#pPlay'); b.setAttribute('aria-pressed', 'true'); b.textContent = '⏸ 暂停';
+  PLAY = setInterval(() => {
+    const cur = PICKD || ds[ds.length - 1];
+    if (cur === ds[ds.length - 1]) { stopPlay(); return; }
+    stepDrill(1);
+  }, 700);
+});
 function c2rev(costAll, d) {
   return DATA.mem.find(m => m.d === d)?.net_rev || 0;
 }
@@ -1048,6 +1241,11 @@ function spy() {
   document.querySelectorAll('.navbar a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
 }
 addEventListener('scroll', spy, { passive: true });
+
+/* ---------- 回到顶部 ---------- */
+const totop = $('#totop');
+addEventListener('scroll', () => totop.classList.toggle('on', scrollY > 600), { passive: true });
+totop.addEventListener('click', () => scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }));
 
 renderAll(true);
 spy();

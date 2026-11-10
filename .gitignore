@@ -3,3 +3,4 @@ sim_*.csv
 # 临时预览产物
 _dark_preview.html
 *.png
+_test_preview.html
