@@ -92,15 +92,15 @@ HTML = r"""<!doctype html>
   @media (max-width:860px){ .grid2{grid-template-columns:1fr;} .intro{grid-template-columns:1fr;} }
 
   /* ---------- KPI ---------- */
-  .kpis { display:grid; grid-template-columns:repeat(7,1fr); gap:16px; margin-top:28px; }
+  .kpis { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:14px; margin-top:28px; }
   @media (max-width:1020px){ .kpis{grid-template-columns:repeat(2,1fr);} .tile.khero{grid-column:span 2;} }
   @media (max-width:560px){ .kpis{grid-template-columns:1fr;} .tile.khero{grid-column:span 1;} }
-  .tile { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:16px; }
-  .tile .lb { font-size:12.5px; color:var(--ink-3); white-space:nowrap; }
-  .tile .v { font-size:30px; font-weight:650; margin:4px 0 2px; white-space:nowrap; font-variant-numeric:tabular-nums; }
-  .tile.khero .v { font-size:52px; line-height:1.12; }
+  .tile { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:14px; }
+  .tile .lb { font-size:12px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .v { font-size:24px; font-weight:650; margin:4px 0 2px; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .tile.khero .v { font-size:32px; line-height:1.15; }
   .tile.khero { grid-column:span 2; }
-  .tile .d { font-size:12.5px; color:var(--ink-3); min-height:18px;
+  .tile .d { font-size:12px; color:var(--ink-3); min-height:18px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tile .d .up { color:var(--good); font-weight:600; }
   .tile svg { display:block; margin-top:12px; width:100%; height:38px; }
@@ -240,7 +240,7 @@ HTML = r"""<!doctype html>
   .kicker::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--s3);
     animation:pulse 2.6s ease-out infinite; }
   @keyframes pulse { 0% { box-shadow:0 0 0 0 var(--glow2); } 70% { box-shadow:0 0 0 10px transparent; } 100% { box-shadow:0 0 0 0 transparent; } }
-  h1 { font-size:54px; letter-spacing:.005em; margin:18px 0 10px; line-height:1.18; }
+  h1 { font-size:44px; letter-spacing:.005em; margin:18px 0 10px; line-height:1.2; }
   @supports ((-webkit-background-clip:text) or (background-clip:text)) {
     h1 { width:fit-content; background:linear-gradient(92deg, var(--ink-1) 0%, var(--s1) 55%, var(--s3) 100%);
       -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -250,8 +250,8 @@ HTML = r"""<!doctype html>
 
   /* 区块标题：编号章 + 渐隐细线 */
   .sec-head { align-items:center; }
-  .sec-no { font-size:44px; font-weight:750; line-height:.9; letter-spacing:.03em; width:fit-content;
-    color:var(--ink-2); opacity:.32; user-select:none; }
+  .sec-no { font-size:36px; font-weight:750; line-height:.9; letter-spacing:.03em; width:fit-content;
+    color:var(--ink-2); opacity:.30; user-select:none; }
   .sec-head::after { content:""; flex:1; height:1px; margin-left:10px;
     background:linear-gradient(90deg, var(--grid), transparent); }
 
@@ -1045,19 +1045,19 @@ function renderKpis(cost, mem, costAll) {
     .map(c => c2rev(costAll, c.d) / c.s_cost);
   const pRatio = cost.filter(c => c.p_cost > 0).map(c => c.p_cr * 100 / c.p_cost);
   const tiles = [
-    { lb: '窗口累计净收入（仿真）', v: money(totRev), hero: true, color: C.s1,
+    { lb: '累计净收入（仿真）', v: money(totRev), hero: true, color: C.s1,
       d: `订阅 + 购买 · ${mem.length} 天窗口`, spark: mem.map(m => m.net_rev) },
     { lb: '新增付费会员', v: intc(totMem) + ' 名', color: C.s1,
       d: prevDelta(mem.map(m => m.members)) || '会员系统 · 去重人数',
       spark: mem.map(m => m.members) },
-    { lb: '期末 MRR（仿真）', v: money(mem[mem.length - 1].mrr), color: C.s1,
-      d: '订阅在册 · 窗口末日', spark: mem.map(m => m.mrr) },
+    { lb: '期末 MRR', v: money(mem[mem.length - 1].mrr), color: C.s1,
+      d: '截至窗口末日', spark: mem.map(m => m.mrr) },
     { lb: '累计核算积分消耗', v: wan(totCr) + ' 万', color: C.s2,
-      d: '购买 + 订阅 + 赠送', spark: cost.map(c => c.p_cr + c.s_cr + c.g_cr) },
+      d: '购买·订阅·赠送', spark: cost.map(c => c.p_cr + c.s_cr + c.g_cr) },
     { lb: '订阅收入成本比', v: subCost ? (totRev / subCost).toFixed(1) + ' 倍' : '—', color: C.s1,
-      d: '订阅分摊成本 ' + money(subCost), spark: subRatio },
+      d: '分摊 ' + money(subCost), spark: subRatio },
     { lb: '购买收入成本比', v: pCost ? (pEq / pCost).toFixed(2) + ' 倍' : '—', color: C.s3,
-      d: '购买分摊成本 ' + money(pCost), spark: pRatio },
+      d: '分摊 ' + money(pCost), spark: pRatio },
   ];
   tiles.forEach(t => {
     const c = div('tile' + (t.hero ? ' khero' : ''));
@@ -1079,7 +1079,7 @@ function renderKpis(cost, mem, costAll) {
     const prev = a.slice(-8, -1).reduce((x, y) => x + y, 0) / 7;
     const last = a[a.length - 1];
     const pct = Math.round((last / prev - 1) * 100);
-    return { txt: `末日 ${last} 人，较前 7 日均值 ${pct >= 0 ? '+' : ''}${pct}%` };
+    return { txt: `7日环比${pct >= 0 ? '+' : ''}${pct}%` };
   }
 }
 
