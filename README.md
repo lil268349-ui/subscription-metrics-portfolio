@@ -29,7 +29,7 @@ python gen_portfolio.py    # 生成仿真数据 portfolio_data.json
 python build_html.py       # 输出单文件 index.html
 ```
 
-`index.html` 为自包含单文件（无外部依赖，可离线打开），内置深浅双主题、悬浮十字线读数、键盘可达与每图数据表孪生。
+`index.html` 为自包含单文件（无外部依赖，可离线打开），默认深色科技感主题（可切浅色）、悬浮十字线读数、键盘可达与每图数据表孪生。
 
 ## 交互清单
 
