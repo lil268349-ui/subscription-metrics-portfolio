@@ -4,3 +4,5 @@ sim_*.csv
 _dark_preview.html
 *.png
 _test_preview.html
+# DOM 探针临时文件
+_probe*.html
