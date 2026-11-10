@@ -59,7 +59,9 @@ HTML = r"""<!doctype html>
   /* ---------- 头部 ---------- */
   .hero { padding:64px 0 8px; }
   .kicker { font-size:13px; letter-spacing:.14em; color:var(--ink-3); font-weight:600; }
-  h1 { font-size:34px; font-weight:700; letter-spacing:.01em; margin:10px 0 6px; }
+  .kicker::before { content:""; display:inline-block; width:9px; height:9px; border-radius:2px;
+    margin-right:9px; vertical-align:-1px; background:linear-gradient(135deg,var(--s1),var(--s3)); }
+  h1 { font-size:38px; font-weight:700; letter-spacing:.01em; margin:10px 0 6px; }
   .herosub { color:var(--ink-2); font-size:15px; }
   .intro { display:grid; grid-template-columns:1.2fr 1fr 1.4fr; gap:20px; margin-top:28px;
     background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:24px; }
@@ -142,17 +144,58 @@ HTML = r"""<!doctype html>
   .tip .r { display:flex; align-items:center; gap:7px; margin-top:2px; }
   .tip .k { width:12px; height:2px; border-radius:1px; flex:none; }
   .tip .v { color:var(--ink-1); font-weight:600; }
+
+  /* ---------- 阅读进度条 ---------- */
+  #prog { position:fixed; top:0; left:0; height:2px; width:0; z-index:60;
+    background:linear-gradient(90deg,var(--s1),var(--s3)); transition:width .08s linear; }
+
+  /* ---------- 左侧章节导航（宽屏） ---------- */
+  .rail { position:fixed; left:max(12px,calc(50% - 632px)); top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:16px; z-index:25; }
+  .rail a { display:flex; align-items:center; gap:9px; color:var(--ink-3); text-decoration:none;
+    font-size:12px; height:18px; }
+  .rail a::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--axis);
+    flex:none; transition:all .25s; }
+  .rail a span { opacity:0; transform:translateX(-4px); transition:all .2s; }
+  .rail a.active { color:var(--ink-1); font-weight:600; }
+  .rail a.active::before { background:var(--s1); transform:scale(1.35); }
+  .rail a.active span, .rail:hover a span { opacity:1; transform:none; }
+  @media (max-width:1340px){ .rail { display:none; } }
+
+  /* ---------- 滚动渐显 ---------- */
+  .rv { opacity:0; transform:translateY(16px);
+    transition:opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1); }
+  .rv.on { opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce) { .rv { opacity:1; transform:none; transition:none; } }
+
+  /* ---------- 数据质量条 ---------- */
+  .qstrip { display:flex; gap:3px; margin:10px 0 6px; }
+  .qc { flex:1; max-width:26px; aspect-ratio:1; border-radius:3px; cursor:pointer; }
+  .qc:hover { transform:scale(1.18); }
+  .qc:focus-visible { outline:2px solid var(--s1); outline-offset:1px; }
+  .qends { display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-3); }
+  .qnote { font-size:12.5px; color:var(--ink-2); margin-top:12px;
+    border-top:1px solid var(--grid); padding-top:12px; }
+
+  /* ---------- 钻取与冲积图 ---------- */
+  .dhead { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .whint { color:var(--s1); font-weight:600; }
+  .sx { overflow-x:auto; margin-top:4px; }
+  .sx svg { min-width:760px; display:block; }
+  .navbar a.active { color:var(--ink-1); font-weight:600; box-shadow:inset 0 -2px var(--s1); }
 </style>
 </head>
 <body>
+<div id="prog"></div>
+<nav class="rail" id="rail" aria-label="章节导航"></nav>
 <div class="wrap">
 
-  <header class="hero">
+  <header class="hero" id="top">
     <p class="kicker">数据产品作品集</p>
     <h1>订阅业务收入成本监控看板</h1>
     <p class="herosub">某海外 AI 创作平台 · 订阅会员与积分购买双轨商业化 · 数据产品经理独立建设</p>
 
-    <div class="intro">
+    <div class="intro rv">
       <div><h3>业务背景</h3>
         <p>平台以积分制售卖 AI 功能用量，收入在订单系统，成本散落在模型调用、渲染、创作者分成等环节。订阅业务上线前，没有一张报表能回答「每条业务赚不赚钱」。</p></div>
       <div><h3>我的角色</h3>
@@ -164,11 +207,11 @@ HTML = r"""<!doctype html>
           <li>数据校验未通过的日期不发布成本数据；报表与订单流水逐笔核对</li>
         </ul></div>
     </div>
-    <div class="disclaimer"><span>⚠</span><span><b>数据说明：</b>本页为仿真数据。曲线形状参考真实业务趋势，数值已缩放与扰动，不对应任何真实经营数字，仅用于展示分析方法与看板设计。</span></div>
+    <div class="disclaimer rv"><span>⚠</span><span><b>数据说明：</b>本页为仿真数据。曲线形状参考真实业务趋势，数值已缩放与扰动，不对应任何真实经营数字，仅用于展示分析方法与看板设计。</span></div>
   </header>
 
   <div class="navbar"><div class="row">
-    <a href="#revenue">收入概览</a><a href="#subroi">订阅 ROI</a><a href="#purchroi">购买 ROI</a><a href="#cost">购买成本</a>
+    <a href="#revenue">收入概览</a><a href="#subroi">订阅 ROI</a><a href="#purchroi">购买 ROI</a><a href="#cost">购买成本</a><a href="#alloc">分摊与质量</a>
     <span class="spacer"></span>
     <div class="seg" role="group" aria-label="时间范围">
       <button data-win="all" aria-pressed="true">全部窗口</button>
@@ -178,9 +221,9 @@ HTML = r"""<!doctype html>
     <button class="iconbtn" id="themeBtn" title="切换深浅色">◐</button>
   </div></div>
 
-  <div class="kpis" id="kpis"></div>
+  <div class="kpis rv" id="kpis"></div>
 
-  <section id="revenue">
+  <section id="revenue" class="rv">
     <div class="sec-head"><span class="sec-no">01</span><h2>收入概览</h2></div>
     <p class="sec-note">订阅业务上线首日即有日级收入追踪：每日净收入与每日新增付费会员。竖线标注为订阅上线日。</p>
     <div class="grid2">
@@ -189,31 +232,44 @@ HTML = r"""<!doctype html>
     </div>
   </section>
 
-  <section id="subroi">
+  <section id="subroi" class="rv">
     <div class="sec-head"><span class="sec-no">02</span><h2>订阅 ROI</h2></div>
     <p class="sec-note">订阅收入指数与订阅分摊成本指数（区间首日 = 100）。收入增长远快于成本增长，是订阅毛利结构的直观证据；收入成本比见指标卡。</p>
     <div class="card"><h4>订阅收入指数 vs 订阅分摊成本指数</h4><p class="sub">同轴双指数线，避免双轴误读</p><div id="c_subroi"></div><details class="tbl" id="t_subroi"></details></div>
   </section>
 
-  <section id="purchroi">
+  <section id="purchroi" class="rv">
     <div class="sec-head"><span class="sec-no">03</span><h2>购买 ROI</h2></div>
     <p class="sec-note">购买积分的消耗等效金额指数与分摊成本指数（区间首日 = 100）。两条线的距离即购买业务的毛利空间。</p>
     <div class="card"><h4>购买消耗等效金额指数 vs 购买分摊成本指数</h4><p class="sub">等效金额按积分面值折算，非现金收入</p><div id="c_proi"></div><details class="tbl" id="t_proi"></details></div>
   </section>
 
-  <section id="cost">
+  <section id="cost" class="rv">
     <div class="sec-head"><span class="sec-no">04</span><h2>购买成本</h2></div>
     <p class="sec-note">左图：每 100 积分分摊成本的指数走势（区间首日 = 100），用于监控定价与成本的匹配度。右图：购买、订阅、赠送三桶的周度消耗构成——分摊比例的来源。</p>
     <div class="grid2">
       <div class="card"><h4>单位积分成本指数</h4><p class="sub">每 100 积分分摊成本 · 区间首日 = 100</p><div id="c_unit"></div><details class="tbl" id="t_unit"></details></div>
       <div class="card"><h4>三桶积分消耗构成（周度）</h4><p class="sub">成本按各桶消耗占比分摊的依据</p><div id="c_bucket"></div><details class="tbl" id="t_bucket"></details></div>
     </div>
+    <div class="card" style="margin-top:16px">
+      <div class="dhead"><div><h4>单位成本构成钻取</h4>
+        <p class="sub">点击上方「单位积分成本指数」任意日期，查看当日单位成本的模型级拆解 · <span id="wdate" class="whint"></span></p></div></div>
+      <div id="c_wf"></div><details class="tbl" id="t_wf"></details>
+    </div>
   </section>
 
-  <footer class="foot">
+  <section id="alloc" class="rv">
+    <div class="sec-head"><span class="sec-no">05</span><h2>成本分摊与数据质量</h2></div>
+    <p class="sec-note">成本从四类来源按各业务桶当日消耗占比分摊的全景流向——赠送积分无直接收入，其分摊成本为平台自担的增长投入。发布质量逐日留痕：校验未通过的日期不发布成本指标，看板上不留灰色地带。</p>
+    <div class="card"><h4>成本来源 → 业务桶 · 分摊全景</h4><p class="sub">悬浮查看每条流量的金额与占比 · 金额为仿真口径</p><div id="c_sankey" class="sx"></div><details class="tbl" id="t_sankey"></details></div>
+    <div class="card" style="margin-top:16px"><h4>逐日发布质量</h4><p class="sub">每个格子是一天 · 悬浮查看当日校验说明</p><div id="c_qual"></div><p class="qnote">复核与补发全量留痕：进入看板的每一个数字，都能回溯到当日的校验记录与订单核对明细。</p></div>
+  </section>
+
+  <footer class="foot rv">
     <h4>方法注记</h4>
     <p>每日已纳入成本（模型网关调用、3D 渲染、创作者分成）乘以各桶消耗占比得到分摊成本；跨日只求和。单位成本 = 区间分摊成本 ÷ 区间消耗，不做日均的简单平均。数据校验未通过的日期不发布成本指标；报表数字与订单流水逐笔核对。</p>
-    <p class="fine">本页数据为仿真数据，仅用于作品展示 · 图表与代码可复现 · 生成器与数据形状见仓库</p>
+    <p class="fine">本页数据为仿真数据，仅用于作品展示 · 图表与代码可复现 · 生成器与数据形状见仓库<br>
+    交互：深浅主题 · 时间窗口筛选 · 悬浮十字线读数 · 单位成本按日钻取 · 冲积分摊全景 · 每图数据表孪生 · 键盘 ←/→/Enter</p>
   </footer>
 </div>
 
@@ -268,6 +324,51 @@ function legendRow(items) {
   return lg;
 }
 
+/* ---------- 全局状态与动效 ---------- */
+let WIN = 'all', PICKD = null, ANIM = true;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function drawIn(p, delay) {
+  const L = p.getTotalLength();
+  p.style.strokeDasharray = L; p.style.strokeDashoffset = L;
+  p.getBoundingClientRect();
+  p.style.transition = `stroke-dashoffset .9s ${delay || 0}ms cubic-bezier(.4,0,.2,1)`;
+  requestAnimationFrame(() => { p.style.strokeDashoffset = '0'; });
+  setTimeout(() => { p.style.strokeDasharray = 'none'; p.style.transition = ''; }, 1150 + (delay || 0));
+}
+function riseIn(nodes, delay) {
+  nodes.forEach((n, i) => {
+    n.style.transformBox = 'fill-box'; n.style.transformOrigin = '50% 100%';
+    n.style.transform = 'scaleY(0.001)';
+    n.style.transition = `transform .55s ${(delay || 0) + i * 14}ms cubic-bezier(.22,1,.36,1)`;
+    requestAnimationFrame(() => requestAnimationFrame(() => { n.style.transform = 'scaleY(1)'; }));
+  });
+}
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function hex2rgb(h) { h = h.replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join('');
+  return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+function mixHex(a, b, t) { const A = hex2rgb(a), B = hex2rgb(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+function countUpVal(node) {
+  if (RM) return;
+  const orig = node.textContent;
+  const m = orig.match(/[\d][\d,]*(\.\d+)?/); if (!m) return;
+  const target = parseFloat(m[0].replace(/,/g, ''));
+  const dec = (m[0].split('.')[1] || '').length;
+  const pre = orig.slice(0, m.index), suf = orig.slice(m.index + m[0].length);
+  const useComma = /,/.test(m[0]);
+  const t0 = performance.now(), D = 900;
+  function fr(t) {
+    let p = Math.min(1, (t - t0) / D); p = 1 - Math.pow(1 - p, 3);
+    const v = target * p;
+    let s = dec ? v.toFixed(dec) : String(Math.round(v));
+    if (useComma) s = Number(s).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    node.textContent = pre + s + suf;
+    if (p < 1) requestAnimationFrame(fr);
+  }
+  requestAnimationFrame(fr);
+}
+
 /* ---------- 折线图（支持多序列 / 面积 / 竖线标注 / 十字线悬浮） ---------- */
 function lineChart(sel, cfg) {
   const box = $(sel); box.textContent = '';
@@ -300,6 +401,7 @@ function lineChart(sel, cfg) {
     t.textContent = nt2.label; svg.append(t);
   });
 
+  const lps = [];
   cfg.series.forEach((s, si) => {
     const pts = s.values.map((v, i) => [X(i), Y(v)]);
     if (cfg.area && si === 0) {
@@ -307,8 +409,9 @@ function lineChart(sel, cfg) {
         [`L ${pts[pts.length - 1][0]} ${Y(0)}`, 'Z']).join(' ');
       svg.append(el('path', { d, fill: s.color, opacity: .10 }));
     }
-    svg.append(el('path', { d: pts.map((p, i) => (i ? 'L' : 'M') + ` ${p[0]} ${p[1]}`).join(' '),
-      fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    const lp = el('path', { d: pts.map((p, i) => (i ? 'L' : 'M') + ` ${p[0]} ${p[1]}`).join(' '),
+      fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    svg.append(lp); lps.push(lp);
     const last = pts[pts.length - 1];
     svg.append(el('circle', { cx: last[0], cy: last[1], r: 4, fill: s.color, stroke: C.surface, 'stroke-width': 2 }));
     const t = el('text', { x: last[0] + 8, y: last[1] + 4, 'font-size': 11, fill: 'var(--ink-2)', 'font-weight': 600 });
@@ -316,15 +419,26 @@ function lineChart(sel, cfg) {
     svg.append(t);
   });
 
+  /* 选中标记（钻取联动） */
+  if (cfg.pick) {
+    const pi = cfg.dates.indexOf(cfg.pick);
+    if (pi >= 0) {
+      const s0 = cfg.series[0];
+      svg.append(el('circle', { cx: X(pi), cy: Y(s0.values[pi]), r: 7, fill: 'none', stroke: C.s2, 'stroke-width': 2 }));
+      svg.append(el('circle', { cx: X(pi), cy: Y(s0.values[pi]), r: 2.5, fill: C.s2 }));
+    }
+  }
+
   const cross = el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, visibility: 'hidden' });
   svg.append(cross);
   const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
-  hit.style.cursor = 'crosshair'; hit.tabIndex = 0;
+  hit.style.cursor = cfg.onPick ? 'pointer' : 'crosshair'; hit.tabIndex = 0;
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '折线图');
-  svg.append(hit); box.append(svg);
+  svg.append(hit);
 
   if (cfg.series.length >= 2) box.append(legendRow(cfg.series.map(s => ({ name: s.name, color: s.color }))));
   box.append(svg);
+  if (ANIM && !RM) lps.forEach((p, i) => drawIn(p, 120 + i * 160));
 
   let idx = n - 1;
   function show(i, cx, cy) {
@@ -345,7 +459,9 @@ function lineChart(sel, cfg) {
     if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
     if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
     if (e.key === 'Escape') { cross.setAttribute('visibility', 'hidden'); tipHide(); }
+    if (e.key === 'Enter' && cfg.onPick) cfg.onPick(cfg.dates[idx]);
   });
+  if (cfg.onPick) hit.addEventListener('click', () => cfg.onPick(cfg.dates[idx]));
   addTable(sel.replace('#c_', '#t_'), cfg.dates, cfg.series, cfg.tipFmt, cfg.head || '');
 }
 
@@ -370,11 +486,13 @@ function colChart(sel, cfg) {
     const t = el('text', { x: m.l + slot * i + slot / 2, y: H - 8, 'text-anchor': 'middle', 'font-size': 11, fill: C.ink3 });
     t.textContent = md(cfg.dates[i]); svg.append(t);
   }
+  const bars = [];
   cfg.values.forEach((v, i) => {
     if (v <= 0) return;
     const x = m.l + slot * i + (slot - bw) / 2, h = Math.max(1, Y(0) - Y(v)), r = Math.min(4, h / 2);
-    svg.append(el('path', { fill: cfg.color, opacity: 1,
-      d: `M ${x} ${Y(0)} V ${Y(v) + r} Q ${x} ${Y(v)} ${x + r} ${Y(v)} H ${x + bw - r} Q ${x + bw} ${Y(v)} ${x + bw} ${Y(v) + r} V ${Y(0)} Z` }));
+    const bar = el('path', { fill: cfg.color, opacity: 1,
+      d: `M ${x} ${Y(0)} V ${Y(v) + r} Q ${x} ${Y(v)} ${x + r} ${Y(v)} H ${x + bw - r} Q ${x + bw} ${Y(v)} ${x + bw} ${Y(v) + r} V ${Y(0)} Z` });
+    svg.append(bar); bars.push(bar);
   });
   cfg.dates.forEach((d, i) => {
     const x = m.l + slot * i;
@@ -387,6 +505,7 @@ function colChart(sel, cfg) {
     svg.append(hit);
   });
   box.append(svg);
+  if (ANIM && !RM) riseIn(bars, 60);
   addTable(sel.replace('#c_', '#t_'), cfg.dates,
     [{ name: cfg.name, color: cfg.color, values: cfg.values }], cfg.tipFmt, cfg.head || '');
 }
@@ -407,16 +526,19 @@ function stackChart(sel, cfg) {
     t.textContent = v; svg.append(t);
   });
   const slot = iw / n, bw = Math.min(24, slot * 0.62);
+  const segs = [];
   cfg.buckets.forEach((b, i) => {
     const x = m.l + slot * i + (slot - bw) / 2; let acc = 0;
     b.parts.forEach(p => {
       const y1 = Y(acc), y0 = Y(acc + p.v), h = Math.max(1, y1 - y0 - 2), r = Math.min(4, h / 2);
       const top = acc + p.v === totals[i] ? y0 + r : y0; /* 顶端圆角只在最上段 */
+      let seg;
       if (acc + p.v === totals[i]) {
-        svg.append(el('path', { fill: p.color, d: `M ${x} ${y1} V ${top} Q ${x} ${y0} ${x + r} ${y0} H ${x + bw - r} Q ${x + bw} ${y0} ${x + bw} ${top} V ${y1} Z` }));
+        seg = el('path', { fill: p.color, d: `M ${x} ${y1} V ${top} Q ${x} ${y0} ${x + r} ${y0} H ${x + bw - r} Q ${x + bw} ${y0} ${x + bw} ${top} V ${y1} Z` });
       } else {
-        svg.append(el('rect', { x, y: y0 + 1, width: bw, height: Math.max(1, h), fill: p.color }));
+        seg = el('rect', { x, y: y0 + 1, width: bw, height: Math.max(1, h), fill: p.color });
       }
+      svg.append(seg); segs.push(seg);
       acc += p.v;
     });
   });
@@ -445,7 +567,237 @@ function stackChart(sel, cfg) {
     li.append(sw, s); lg.append(li);
   });
   box.append(lg, svg);
+  if (ANIM && !RM) riseIn(segs, 60);
   addTableStack(sel.replace('#c_', '#t_'), cfg);
+}
+
+/* ---------- 冲积图（成本来源 → 业务桶分摊全景） ---------- */
+function kf(v) { return v >= 1000 ? '$' + (v / 1000).toFixed(1) + 'k' : '$' + Math.round(v); }
+
+function sankeyChart(sel, agg) {
+  const box = $(sel); box.textContent = '';
+  const W = 1000, H = 400, nw = 14, gap = 16, mT = 30, mB = 14, mL = 128, mR = 118;
+  const { flows, src } = agg;
+  const bktNames = agg.bktNames;
+  const total = src.reduce((a, b) => a + b, 0);
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', style: 'display:block',
+    role: 'img', 'aria-label': '成本来源到业务桶的分摊冲积图' });
+
+  /* 列布局：节点高 ∝ 金额，列内居中 */
+  const k = Math.min((H - mT - mB - gap * (src.length - 1)) / total,
+                     (H - mT - mB - gap * (bktNames.length - 1)) / total);
+  const bktTot = bktNames.map(bn => flows.filter(f => f.b === bn).reduce((a, f) => a + f.v, 0));
+  const yStart = nn => mT + (H - mT - mB - (total * k + (nn - 1) * gap)) / 2;
+  const Lp = {}; let yy = yStart(src.length);
+  DATA.src_names.forEach((s2, i) => { Lp[s2] = { x: mL, y: yy, h: Math.max(2, src[i] * k) }; yy += src[i] * k + gap; });
+  const Rp = {}; yy = yStart(bktNames.length);
+  bktNames.forEach((b2, i) => { Rp[b2] = { x: W - mR, y: yy, h: Math.max(2, bktTot[i] * k) }; yy += bktTot[i] * k + gap; });
+
+  /* 深色主题下去饱和更少、缎带更实，避免小流量节点融进背景 */
+  const dk = (() => { const c = hex2rgb(cssVar('--surface-1')); return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255 < 0.5; })();
+  const MUTE = dk ? 0.22 : 0.45, ROP = dk ? 0.44 : 0.34;
+  const SRC_COLS = ['--s1', '--s2', '--s3', '--s5'];  /* 调色板无 --s4，第四来源取粉色 */
+  const muted = SRC_COLS.map(v => mixHex(cssVar(v), cssVar('--surface-1'), MUTE));
+  const bktCol = [cssVar('--s1'), cssVar('--s2'), cssVar('--s3')];
+
+  /* 渐变（来源色 → 桶色） */
+  const defs = el('defs', {});
+  flows.forEach((f, i) => {
+    const g = el('linearGradient', { id: 'sk' + i, x1: 0, x2: 1, y1: 0, y2: 0 });
+    g.append(el('stop', { offset: '0%', 'stop-color': muted[DATA.src_names.indexOf(f.s)] }));
+    g.append(el('stop', { offset: '100%', 'stop-color': bktCol[bktNames.indexOf(f.b)] }));
+    defs.append(g);
+  });
+  svg.append(defs);
+
+  /* 缎带 */
+  const offL = {}, offR = {};
+  DATA.src_names.forEach(s2 => offL[s2] = Lp[s2].y);
+  bktNames.forEach(b2 => offR[b2] = Rp[b2].y);
+  const ribbons = [];
+  flows.forEach((f, i) => {
+    const h = Math.max(1, f.v * k);
+    const y0 = offL[f.s], y1 = offR[f.b];
+    offL[f.s] += h; offR[f.b] += h;
+    const x0 = Lp[f.s].x + nw, x1 = Rp[f.b].x, mx = (x0 + x1) / 2;
+    const p = el('path', { d: `M ${x0} ${y0} C ${mx} ${y0} ${mx} ${y1} ${x1} ${y1} L ${x1} ${y1 + h} C ${mx} ${y1 + h} ${mx} ${y0 + h} ${x0} ${y0 + h} Z`,
+      fill: 'url(#sk' + i + ')', opacity: ROP });
+    p.style.cursor = 'default';
+    p.addEventListener('pointerenter', () => {
+      ribbons.forEach(r2 => { if (r2 !== p) r2.style.opacity = .08; });
+      p.style.opacity = .78;
+    });
+    p.addEventListener('pointermove', e => {
+      const t = tipDate(f.s + ' → ' + f.b + '消耗');
+      t.append(tipRow(bktCol[bktNames.indexOf(f.b)], money(f.v), '分摊金额（仿真）'));
+      t.append(tipRow('var(--ink-3)', (f.v / total * 100).toFixed(1) + '%', '占窗口总成本'));
+      tipShow(t, e.clientX, e.clientY);
+    });
+    p.addEventListener('pointerleave', () => {
+      ribbons.forEach(r2 => { r2.style.opacity = ''; });
+      tipHide();
+    });
+    svg.append(p); ribbons.push(p);
+  });
+
+  /* 节点与直标 */
+  function nodeBlock(pos, name, val, color, side) {
+    const g = el('g', {});
+    const r = el('rect', { x: pos.x, y: pos.y, width: nw, height: pos.h, rx: 3, fill: color });
+    r.addEventListener('pointerenter', () => ribbons.forEach(p2 => {
+      const keep = flows.some(f => (f.s === name || f.b === name) && p2 === ribbons[flows.indexOf(f)]);
+      if (!keep) p2.style.opacity = .08;
+    }));
+    r.addEventListener('pointerleave', () => ribbons.forEach(p2 => { p2.style.opacity = ''; }));
+    const nm = el('text', { x: side === 'l' ? pos.x - 10 : pos.x + nw + 10, y: pos.y + pos.h / 2 - 3,
+      'text-anchor': side === 'l' ? 'end' : 'start', 'font-size': 13, fill: 'var(--ink-1)', 'font-weight': 600 });
+    nm.textContent = name;
+    const vl = el('text', { x: side === 'l' ? pos.x - 10 : pos.x + nw + 10, y: pos.y + pos.h / 2 + 15,
+      'text-anchor': side === 'l' ? 'end' : 'start', 'font-size': 11.5, fill: 'var(--ink-3)' });
+    vl.textContent = kf(val) + ' · ' + (val / total * 100).toFixed(0) + '%';
+    g.append(r, nm, vl); svg.append(g);
+  }
+  DATA.src_names.forEach((s2, i) => nodeBlock(Lp[s2], s2, src[i], muted[i], 'l'));
+  bktNames.forEach((b2, i) => nodeBlock(Rp[b2], b2 + '消耗', bktTot[i], bktCol[i], 'r'));
+
+  box.append(svg);
+  if (ANIM && !RM) {
+    svg.style.opacity = 0; svg.style.transition = 'opacity .8s ease';
+    requestAnimationFrame(() => requestAnimationFrame(() => { svg.style.opacity = 1; }));
+  }
+  flowTable(sel.replace('#c_', '#t_'), flows, bktNames, total);
+}
+
+function flowTable(sel, flows, bktNames, total) {
+  const box = $(sel); if (!box) return; box.textContent = '';
+  const d = document.createElement('details'), s = document.createElement('summary');
+  s.textContent = '查看分摊明细表'; d.append(s);
+  const w = div('tblwrap'), t = document.createElement('table');
+  const thead = document.createElement('thead'), trh = document.createElement('tr');
+  ['成本来源', '业务桶', '分摊金额（仿真）', '占比'].forEach(hh => {
+    const th = document.createElement('th'); th.textContent = hh; trh.append(th); });
+  thead.append(trh); t.append(thead);
+  const tb = document.createElement('tbody');
+  flows.forEach(f => {
+    const tr = document.createElement('tr');
+    [[f.s], [f.b], [money(f.v)], [(f.v / total * 100).toFixed(1) + '%']].forEach(([v]) => {
+      const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+    tb.append(tr);
+  });
+  t.append(tb); w.append(t); d.append(w); box.append(d);
+}
+
+/* ---------- 数据质量条（逐日发布状态） ---------- */
+function qualityStrip(sel, arr) {
+  const box = $(sel); box.textContent = '';
+  const stC = { ok: 'var(--good)', review: 'var(--s2)', delay: 'var(--s5)' };
+  const stN = { ok: '校验通过', review: '复核后补发', delay: '暂缓发布 · 次日补发' };
+  const cnt = { ok: 0, review: 0, delay: 0 };
+  const strip = div('qstrip');
+  arr.forEach(q => {
+    cnt[q.st]++;
+    const c = div('qc'); c.style.background = stC[q.st]; c.tabIndex = 0;
+    c.setAttribute('role', 'img');
+    c.setAttribute('aria-label', q.d + ' ' + stN[q.st] + '：' + q.note);
+    c.addEventListener('pointermove', e => {
+      const t = tipDate(q.d);
+      t.append(tipRow(stC[q.st], stN[q.st], q.note));
+      tipShow(t, e.clientX, e.clientY);
+    });
+    c.addEventListener('pointerleave', tipHide);
+    strip.append(c);
+  });
+  const lg = legendRow([
+    { name: '校验通过 · 正常发布 ' + cnt.ok + ' 天', color: stC.ok, rect: true },
+    { name: '复核后补发 ' + cnt.review + ' 天', color: stC.review, rect: true },
+    { name: '暂缓发布 ' + cnt.delay + ' 天', color: stC.delay, rect: true }]);
+  const ends = div('qends');
+  const e1 = document.createElement('span'); e1.textContent = arr[0].d.slice(5).replace('-', '/');
+  const e2 = document.createElement('span'); e2.textContent = '共 ' + arr.length + ' 天';
+  const e3 = document.createElement('span'); e3.textContent = arr[arr.length - 1].d.slice(5).replace('-', '/');
+  ends.append(e1, e2, e3);
+  box.append(lg, strip, ends);
+}
+
+/* ---------- 瀑布图（单位成本按模型拆解） ---------- */
+function waterfall(sel, cfg) {
+  const box = $(sel); box.textContent = '';
+  const W = box.clientWidth || 900, H = 240, m = { t: 26, r: 12, b: 40, l: 52 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const items = cfg.parts.map(p => ({ name: p.name, v: p.v, total: false }))
+    .concat([{ name: '当日合计', v: cfg.total, total: true }]);
+  const n = items.length;
+  const ticks = niceTicks(cfg.total, 4);
+  const yMax = ticks[ticks.length - 1];
+  const Y = v => m.t + ih - v / yMax * ih;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', style: 'display:block',
+    role: 'img', 'aria-label': '当日单位成本按模型拆解瀑布图' });
+  ticks.forEach(v => {
+    svg.append(el('line', { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: C.grid, 'stroke-width': 1 }));
+    const t = el('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: C.ink3 });
+    t.textContent = '$' + v.toFixed(1); svg.append(t);
+  });
+  const gapT = 26; /* 合计柱额外间距 */
+  const slot = (iw - gapT) / n, bw = Math.min(64, slot * 0.58);
+  const surf = cssVar('--surface-1'), c1 = cssVar('--s1');
+  const ramp = t => mixHex(surf, c1, t);
+  const bars = [];
+  let cum = 0, prevRight = null, prevY = null;
+  items.forEach((it, i) => {
+    const x = m.l + slot * i + (slot - bw) / 2 + (it.total ? gapT : 0);
+    const yTop = it.total ? Y(it.v) : Y(cum + it.v);
+    const yBot = it.total ? Y(0) : Y(cum);
+    const bar = el('rect', { x, y: yTop, width: bw, height: Math.max(2, yBot - yTop), rx: 3 });
+    bar.style.fill = it.total ? 'var(--ink-1)' : ramp(0.42 + 0.58 * i / Math.max(1, cfg.parts.length - 1));
+    svg.append(bar); bars.push(bar);
+    if (prevRight !== null && !it.total) {
+      svg.append(el('line', { x1: prevRight, x2: x, y1: prevY, y2: prevY,
+        stroke: C.axis, 'stroke-width': 1, 'stroke-dasharray': '2 3' }));
+    }
+    if (!it.total) { cum += it.v; prevRight = x + bw; prevY = Y(cum); }
+    const lbl = el('text', { x: x + bw / 2, y: yTop - 7, 'text-anchor': 'middle',
+      'font-size': 11, fill: it.total ? 'var(--ink-1)' : 'var(--ink-2)',
+      'font-weight': it.total ? 700 : 400 });
+    lbl.textContent = '$' + it.v.toFixed(2); svg.append(lbl);
+    const xt = el('text', { x: x + bw / 2, y: H - 10, 'text-anchor': 'middle', 'font-size': 11.5,
+      fill: it.total ? 'var(--ink-1)' : 'var(--ink-3)', 'font-weight': it.total ? 600 : 400 });
+    xt.textContent = it.name; svg.append(xt);
+    const hit = el('rect', { x: m.l + slot * i + (it.total ? gapT : 0), y: m.t, width: slot, height: ih, fill: 'transparent' });
+    hit.addEventListener('pointermove', e => {
+      const t = tipDate(cfg.date + (it.total ? ' · 合计' : ''));
+      t.append(tipRow(it.total ? 'var(--ink-1)' : bar.style.fill,
+        '$' + it.v.toFixed(2) + ' / 万积分', it.total ? '当日单位成本' : it.name));
+      if (!it.total) t.append(tipRow('var(--ink-3)', (it.v / cfg.total * 100).toFixed(1) + '%', '占当日'));
+      tipShow(t, e.clientX, e.clientY);
+    });
+    hit.addEventListener('pointerleave', tipHide);
+    svg.append(hit);
+  });
+  box.append(svg);
+  if (ANIM && !RM) riseIn(bars, 40);
+}
+function wfTable(sel, parts, total) {
+  const box = $(sel); if (!box) return; box.textContent = '';
+  const d = document.createElement('details'), s = document.createElement('summary');
+  s.textContent = '查看拆解数据表'; d.append(s);
+  const w = div('tblwrap'), t = document.createElement('table');
+  const thead = document.createElement('thead'), trh = document.createElement('tr');
+  ['模型 / 成本项', '贡献（$/万积分）', '占当日'].forEach(hh => {
+    const th = document.createElement('th'); th.textContent = hh; trh.append(th); });
+  thead.append(trh); t.append(thead);
+  const tb = document.createElement('tbody');
+  parts.forEach(p => {
+    const tr = document.createElement('tr');
+    [p.name, '$' + p.v.toFixed(2), (p.v / total * 100).toFixed(1) + '%'].forEach(v => {
+      const td = document.createElement('td'); td.textContent = v; tr.append(td); });
+    tb.append(tr);
+  });
+  const tr = document.createElement('tr');
+  ['当日合计', '$' + total.toFixed(2), '100%'].forEach(v => {
+    const td = document.createElement('td'); td.textContent = v;
+    td.style.fontWeight = 600; tr.append(td); });
+  tb.append(tr);
+  t.append(tb); w.append(t); d.append(w); box.append(d);
 }
 
 /* ---------- 表格孪生 ---------- */
@@ -501,7 +853,6 @@ function spark(vals, color) {
 }
 
 /* ---------- 窗口与渲染 ---------- */
-let WIN = 'all';
 const LAUNCH = DATA.launch;
 function sliceDays(days, win) {
   if (win === 'all') return days;
@@ -547,6 +898,7 @@ function renderKpis(cost, mem) {
     if (t.spark) c.append(spark(t.spark, t.color));
     box.append(c);
   });
+  if (ANIM && !RM) box.querySelectorAll('.v').forEach(countUpVal);
   function prevDelta(a) {
     if (a.length < 8) return undefined;
     const prev = a.slice(-8, -1).reduce((x, y) => x + y, 0) / 7;
@@ -556,7 +908,9 @@ function renderKpis(cost, mem) {
   }
 }
 
-function renderAll() {
+function renderAll(animate) {
+  ANIM = animate !== false;
+  tipHide();
   const costAll = DATA.cost, memAll = DATA.mem;
   const cost = sliceDays(costAll, WIN);
   const mem = sliceDays(memAll, WIN);
@@ -595,6 +949,7 @@ function renderAll() {
 
   lineChart('#c_unit', { h: 250, dates: cost.map(c => c.d), name: '单位成本指数',
     area: true, color: C.s1, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
+    pick: PICKD, onPick: d => { PICKD = (PICKD === d ? null : d); renderAll(false); },
     series: [{ name: '单位积分成本指数', color: C.s1, values: idx(cost.map(c => c.unit_idx)) }] });
 
   /* 三桶周度 */
@@ -610,6 +965,35 @@ function renderAll() {
   }
   stackChart('#c_bucket', { buckets, parts: [
     { name: '购买', color: C.s1 }, { name: '订阅', color: C.s2 }, { name: '赠送', color: C.s3 }] });
+
+  /* 05 分摊全景 + 质量条 + 单位成本钻取 */
+  const sdS = sliceDays(DATA.src_daily, WIN);
+  sankeyChart('#c_sankey', aggFlows(cost, sdS));
+  qualityStrip('#c_qual', sliceDays(DATA.quality, WIN));
+  renderDrill(cost);
+}
+function aggFlows(cost, sd) {
+  const bkt = ['购买', '订阅', '赠送'];
+  const st = DATA.src_names.map(() => 0);
+  const fm = DATA.src_names.map(() => [0, 0, 0]);
+  cost.forEach((c, i) => {
+    const row = sd[i]; const s = c.p_cr + c.s_cr + c.g_cr;
+    const bs = [c.p_cr / s, c.s_cr / s, c.g_cr / s];
+    row.s.forEach((v, si) => bs.forEach((sh, bi) => {
+      const x = v * sh; st[si] += x; fm[si][bi] += x;
+    }));
+  });
+  const flows = [];
+  DATA.src_names.forEach((sn, si) => bkt.forEach((bn, bi) => flows.push({ s: sn, b: bn, v: fm[si][bi] })));
+  return { flows, src: st, bktNames: bkt };
+}
+function renderDrill(cost) {
+  const d = PICKD || cost[cost.length - 1].d;
+  const up = DATA.unit_parts.find(u => u.d === d) || DATA.unit_parts[DATA.unit_parts.length - 1];
+  const total = up.parts.reduce((a, p) => a + p.v, 0);
+  $('#wdate').textContent = '当前：' + d + ' · 合计 $' + total.toFixed(2) + ' / 万积分';
+  waterfall('#c_wf', { parts: up.parts, total, date: d });
+  wfTable('#t_wf', up.parts, total);
 }
 function c2rev(costAll, d) {
   return DATA.mem.find(m => m.d === d)?.net_rev || 0;
@@ -620,7 +1004,7 @@ document.querySelectorAll('.seg button').forEach(b => {
   b.addEventListener('click', () => {
     document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', 'true');
-    WIN = b.dataset.win; renderAll();
+    WIN = b.dataset.win; PICKD = null; renderAll(true);
   });
 });
 const themeBtn = $('#themeBtn');
@@ -632,10 +1016,41 @@ themeBtn.addEventListener('click', () => {
   const next = dark ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('pf-theme', next);
-  renderAll();
+  renderAll(false);
 });
-let rT; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(renderAll, 150); });
-renderAll();
+let rT; addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => renderAll(false), 150); });
+
+/* ---------- 叙事层：渐显 / 进度条 / 章节联动 ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); }
+}), { threshold: .08 });
+document.querySelectorAll('.rv').forEach(n => io.observe(n));
+
+const SECS = [['top', '总览'], ['revenue', '收入概览'], ['subroi', '订阅 ROI'],
+  ['purchroi', '购买 ROI'], ['cost', '购买成本'], ['alloc', '分摊与质量']];
+const rail = $('#rail');
+SECS.forEach(([id, t]) => {
+  const a = document.createElement('a'); a.href = '#' + id; a.title = t;
+  const s = document.createElement('span'); s.textContent = t;
+  a.append(s); rail.append(a);
+});
+const prog = $('#prog');
+function spy() {
+  const h = document.documentElement;
+  const p = h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight);
+  prog.style.width = (p * 100).toFixed(2) + '%';
+  let cur = SECS[0][0];
+  SECS.forEach(([id]) => {
+    const n = document.getElementById(id);
+    if (n && n.getBoundingClientRect().top <= 170) cur = id;
+  });
+  rail.querySelectorAll('a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+  document.querySelectorAll('.navbar a').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}
+addEventListener('scroll', spy, { passive: true });
+
+renderAll(true);
+spy();
 </script>
 </body>
 </html>

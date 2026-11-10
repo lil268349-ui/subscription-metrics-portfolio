@@ -81,6 +81,44 @@ sub_cost_total = sum(c["s_cost"] for c in cost)
 p_ratio = round(sum(p_equiv) / max(1, sum(c["p_cost"] for c in cost)), 2)
 sub_ratio = round(tot_rev / max(1, sub_cost_total), 1)
 
+# ---- 成本来源（仿真：四类来源按当日成本占比，流量在构建端按三桶消耗占比拆分）----
+SRC = [("模型网关调用", 0.52), ("3D 渲染", 0.27), ("创作者分成", 0.15), ("模板与案例分成", 0.06)]
+src_daily = []
+for c in cost:
+    w = [jitter(s, 0.06) for _, s in SRC]
+    z = sum(w)
+    src_daily.append({"d": c["d"], "s": [round(v / z * c["cost"], 1) for v in w]})
+
+# ---- 单位成本模型级拆解（$/万积分 贡献，仿真；旗舰模型单位成本缓慢上行）----
+MODELS = [("对话模型·旗舰", 0.38, 13.0, 0.12), ("对话模型·轻量", 0.27, 4.0, 0.0),
+          ("图像模型", 0.18, 5.5, 0.02), ("3D 渲染", 0.11, 9.5, -0.03), ("创作者分成", 0.06, 7.0, 0.0)]
+unit_parts = []
+n_days = len(cost)
+for i, c in enumerate(cost):
+    t = i / max(1, n_days - 1)
+    shares, units = [], []
+    for _, sh, base, drift in MODELS:
+        shares.append(max(0.02, sh * (1 + rng.uniform(-0.18, 0.18))))
+        units.append(base * (1 + drift * t) * (1 + rng.uniform(-0.04, 0.04)))
+    z = sum(shares)
+    raw = [s_ / z * u_ for s_, u_ in zip(shares, units)]
+    target = c["cost"] / max(0.1, c["p_cr"] + c["s_cr"] + c["g_cr"])
+    k = target / sum(raw)
+    unit_parts.append({"d": c["d"], "parts": [
+        {"name": nm, "v": round(r * k, 2)} for (nm, _, _, _), r in zip(MODELS, raw)]})
+
+# ---- 逐日发布质量（仿真情节：多数通过，个别复核补发/延迟发布）----
+quality = []
+for i, c in enumerate(cost):
+    st, note = "ok", "校验通过 · 当日正常发布"
+    if i == 9:
+        st, note = "review", "订单核对差异 2 笔 · 复核通过后补发"
+    if i == 23:
+        st, note = "delay", "上游数据延迟到齐 · 当日暂缓发布，次日补发"
+    if i == 40:
+        st, note = "review", "模型用量重算 · 复核通过后补发"
+    quality.append({"d": c["d"], "st": st, "note": note})
+
 data = {
     "cost": cost,
     "mem": mem,
@@ -97,6 +135,10 @@ data = {
         "mrr_last": mem[-1]["mrr"],
         "days_cost": len(cost), "days_mem": len(mem),
     },
+    "src_names": [s for s, _ in SRC],
+    "src_daily": src_daily,
+    "unit_parts": unit_parts,
+    "quality": quality,
     "launch": "2026-10-21",
 }
 
