@@ -31,30 +31,33 @@
     background:var(--page); color:var(--ink-1); line-height:1.6; font-size:15px;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap { max-width:1120px; margin:0 auto; padding:0 24px 64px; }
+  .wrap { max-width:1240px; margin:0 auto; padding:0 20px 36px; }
 
   /* ---------- 头部 ---------- */
-  .hero { padding:40px 0 6px; }
+  .hero { padding:20px 0 4px; }
   .kicker { font-size:13px; letter-spacing:.14em; color:var(--ink-3); font-weight:600; }
   .kicker::before { content:""; display:inline-block; width:9px; height:9px; border-radius:2px;
     margin-right:9px; vertical-align:-1px; background:linear-gradient(135deg,var(--s1),var(--s3)); }
-  h1 { font-size:38px; font-weight:700; letter-spacing:.01em; margin:10px 0 6px; }
-  .herosub { color:var(--ink-2); font-size:15px; }
-  .intro { display:grid; grid-template-columns:1.2fr 1fr 1.4fr; gap:18px; margin-top:16px;
-    background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:16px 18px; }
-  .intro h3 { font-size:12px; color:var(--ink-3); font-weight:600; letter-spacing:.08em; margin-bottom:8px; }
-  .intro p, .intro li { font-size:14px; color:var(--ink-2); }
+  h1 { font-size:28px; font-weight:700; letter-spacing:.01em; margin:8px 0 4px; }
+  .herosub { color:var(--ink-2); font-size:13px; }
+  .intro { display:grid; grid-template-columns:1.2fr 1fr 1.4fr; gap:10px; margin-top:10px;
+    background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:10px 14px; }
+  .intro h3 { font-size:11px; color:var(--ink-3); font-weight:600; letter-spacing:.08em; margin-bottom:4px; }
+  .intro p, .intro li { font-size:12.5px; color:var(--ink-2); line-height:1.5; }
   .intro ul { list-style:none; }
-  .intro li { padding-left:16px; position:relative; margin-bottom:6px; }
+  .intro li { padding-left:14px; position:relative; margin-bottom:3px; }
   .intro li::before { content:""; position:absolute; left:0; top:.62em; width:8px; height:2px; background:var(--s1); }
-  .disclaimer { margin-top:10px; display:flex; gap:8px; align-items:flex-start;
-    font-size:12.5px; color:var(--ink-2); background:var(--surface-1);
-    border:1px solid var(--ring); border-left:3px solid var(--s2); border-radius:10px; padding:9px 14px; }
+  details.introdetails > summary { cursor:pointer; color:var(--ink-3); font-size:12.5px; padding:7px 2px 5px; }
+  details.introdetails > summary:hover { color:var(--ink-2); }
+  details.introdetails[open] > summary { margin-bottom:2px; }
+  .disclaimer { margin-top:8px; display:flex; gap:8px; align-items:flex-start;
+    font-size:11.5px; color:var(--ink-2); background:var(--surface-1);
+    border:1px solid var(--ring); border-left:3px solid var(--s2); border-radius:10px; padding:6px 12px; }
   .disclaimer b { color:var(--ink-1); }
 
   /* ---------- 导航 + 筛选 ---------- */
   .navbar { position:sticky; top:0; z-index:30; background:var(--page);
-    border-bottom:1px solid var(--ring); margin-top:22px; padding:8px 0; }
+    border-bottom:1px solid var(--ring); margin-top:12px; padding:6px 0; }
   .navbar .row { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
   .navbar a { color:var(--ink-2); text-decoration:none; font-size:14px; padding:4px 2px; }
   .navbar a:hover { color:var(--ink-1); }
@@ -68,30 +71,32 @@
     font-size:14px; padding:6px 10px; cursor:pointer; color:var(--ink-2); }
 
   /* ---------- 区块与卡片 ---------- */
-  section { margin-top:44px; }
+  section { margin-top:16px; }
   .sec-head { display:flex; align-items:baseline; gap:12px; margin-bottom:6px; }
   .sec-no { font-size:13px; color:var(--ink-3); font-weight:600; letter-spacing:.1em; }
   h2 { font-size:25px; font-weight:700; letter-spacing:.01em; }
-  .sec-note { color:var(--ink-2); font-size:13.5px; margin-bottom:12px; max-width:820px; }
-  .card { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:16px 16px 10px; }
-  .card h4 { font-size:15px; font-weight:650; letter-spacing:.01em; }
-  .card .sub { font-size:13px; color:var(--ink-3); margin:3px 0 12px; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  @media (max-width:860px){ .grid2{grid-template-columns:1fr;} .intro{grid-template-columns:1fr;} }
+  .sec-note { color:var(--ink-2); font-size:12.5px; margin-bottom:10px; max-width:900px; }
+  .card { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:10px 12px 8px; }
+  .card h4 { font-size:13px; font-weight:650; letter-spacing:.01em; }
+  .card .sub { font-size:11.5px; color:var(--ink-3); margin:2px 0 8px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  @media (max-width:860px){ .grid2{grid-template-columns:1fr;} .grid3{grid-template-columns:1fr;}
+    .intro{grid-template-columns:1fr;} }
 
   /* ---------- KPI ---------- */
-  .kpis { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:12px; margin-top:18px; }
+  .kpis { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; margin-top:10px; }
   @media (max-width:1020px){ .kpis{grid-template-columns:repeat(2,1fr);} .tile.khero{grid-column:span 2;} }
   @media (max-width:560px){ .kpis{grid-template-columns:1fr;} .tile.khero{grid-column:span 1;} }
-  .tile { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:14px; }
+  .tile { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:10px 11px; }
   .tile .lb { font-size:12px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .tile .v { font-size:24px; font-weight:650; margin:4px 0 2px; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
-  .tile.khero .v { font-size:32px; line-height:1.15; }
+  .tile .v { font-size:19px; font-weight:650; margin:3px 0 1px; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .tile.khero .v { font-size:25px; line-height:1.15; }
   .tile.khero { grid-column:span 2; }
   .tile .d { font-size:12px; color:var(--ink-3); min-height:18px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .tile .d .up { color:var(--good); font-weight:600; }
-  .tile svg { display:block; margin-top:12px; width:100%; height:38px; }
+  .tile svg { display:block; margin-top:8px; width:100%; height:30px; }
 
   /* ---------- v5 业务线 Tab（导航栏内联，全局唯一 tab 系统） ---------- */
   .navbar a[data-tab] { padding:5px 13px; border-radius:999px; font-weight:600; transition:all .2s; }
@@ -99,22 +104,22 @@
   .navbar a[data-tab][aria-selected="true"] { color:#fff;
     background:linear-gradient(92deg,var(--s1),var(--s3)); box-shadow:0 6px 18px -8px var(--glow); }
   :root[data-theme="light"] .navbar a[data-tab][aria-selected="true"] { color:#fff; }
-  .kchips { display:flex; gap:10px; flex-wrap:wrap; margin:0 0 12px; }
-  .kchips .kc { display:flex; align-items:baseline; gap:7px; padding:7px 12px;
+  .kchips { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 10px; }
+  .kchips .kc { display:flex; align-items:baseline; gap:6px; padding:5px 10px;
     border:1px solid var(--glass-bd); background:var(--glass); border-radius:9px;
     font-size:12px; color:var(--ink-3); }
-  .kchips .kc b { font-size:16px; font-weight:650; color:var(--ink-1); font-variant-numeric:tabular-nums; }
+  .kchips .kc b { font-size:14px; font-weight:650; color:var(--ink-1); font-variant-numeric:tabular-nums; }
   .kchips .kc b.pos { color:var(--s3); }
   .kchips .kc b.neg { color:var(--s2); }
 
   /* ---------- v4.2 图下统计条 + 紧凑明细表 ---------- */
-  .cstats { display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--ink-3);
+  .cstats { display:flex; gap:10px; flex-wrap:wrap; font-size:11px; color:var(--ink-3);
     margin:2px 0 4px; font-variant-numeric:tabular-nums; }
   .cstats b { color:var(--ink-2); font-weight:600; }
-  .mini { margin-top:12px; }
+  .mini { margin-top:0; overflow-x:auto; }
   .mini h4 { margin-bottom:6px; }
-  .mini table { font-size:12px; }
-  .mini th, .mini td { padding:3px 8px; }
+  .mini table { font-size:11px; }
+  .mini th, .mini td { padding:2px 5px; }
   .mini thead th { color:var(--ink-3); }
 
   /* ---------- 图例 / 表格 / 脚注 ---------- */
@@ -126,14 +131,14 @@
   details.tbl summary { font-size:12.5px; color:var(--ink-3); cursor:pointer; }
   details.tbl summary:hover { color:var(--ink-2); }
   .tblwrap { max-height:260px; overflow:auto; margin-top:8px; border:1px solid var(--grid); border-radius:8px; }
-  table { border-collapse:collapse; width:100%; font-size:12.5px; }
-  th,td { text-align:right; padding:5px 10px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  table { border-collapse:collapse; width:100%; font-size:12px; }
+  th,td { text-align:right; padding:4px 8px; white-space:nowrap; font-variant-numeric:tabular-nums; }
   th:first-child, td:first-child { text-align:left; }
   thead th { position:sticky; top:0; background:var(--surface-1); color:var(--ink-2); font-weight:600;
     border-bottom:1px solid var(--grid); }
   tbody tr + tr td { border-top:1px solid var(--grid); }
-  .foot { margin-top:32px; border-top:1px solid var(--ring); padding-top:16px;
-    color:var(--ink-2); font-size:13.5px; max-width:860px; }
+  .foot { margin-top:18px; border-top:1px solid var(--ring); padding-top:12px;
+    color:var(--ink-2); font-size:12.5px; max-width:980px; }
   .foot h4 { color:var(--ink-1); font-size:14px; margin-bottom:6px; }
   .foot .fine { color:var(--ink-3); font-size:12.5px; margin-top:14px; }
 
@@ -241,19 +246,19 @@
   /* 玻璃导航条 */
   .navbar { background:transparent; border-bottom-color:transparent; }
   .navbar .row { background:var(--glass); border:1px solid var(--glass-bd); border-radius:14px;
-    padding:9px 14px; margin:0 0 4px;
+    padding:6px 12px; margin:0 0 2px;
     -webkit-backdrop-filter:blur(14px) saturate(1.15); backdrop-filter:blur(14px) saturate(1.15);
     box-shadow:0 12px 34px -24px var(--lift), inset 0 1px 0 var(--edge); }
 
   /* 头部：胶囊徽标 + 渐变大标题 */
-  .hero { padding:44px 0 6px; }
+  .hero { padding:12px 0 2px; }
   .kicker { display:inline-flex; align-items:center; gap:9px; font-size:12.5px; letter-spacing:.16em;
     color:var(--ink-2); font-weight:600; border:1px solid var(--glass-bd); background:var(--glass);
-    padding:7px 15px; border-radius:999px; }
+    padding:4px 12px; border-radius:999px; }
   .kicker::before { content:""; width:8px; height:8px; border-radius:50%; background:var(--s3);
     animation:pulse 2.6s ease-out infinite; }
   @keyframes pulse { 0% { box-shadow:0 0 0 0 var(--glow2); } 70% { box-shadow:0 0 0 10px transparent; } 100% { box-shadow:0 0 0 0 transparent; } }
-  h1 { font-size:44px; letter-spacing:.005em; margin:14px 0 8px; line-height:1.2; }
+  h1 { font-size:28px; letter-spacing:.005em; margin:8px 0 4px; line-height:1.2; }
   @supports ((-webkit-background-clip:text) or (background-clip:text)) {
     h1 { width:fit-content; background:linear-gradient(92deg, var(--ink-1) 0%, var(--s1) 55%, var(--s3) 100%);
       -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -314,7 +319,8 @@
     <h1>订阅业务收入成本监控看板</h1>
     <p class="herosub">某海外 AI 创作平台 · 订阅会员与积分购买双轨商业化 · 数据产品经理独立建设</p>
 
-    <div class="intro rv">
+    <details class="introdetails rv"><summary>项目说明 · 业务背景 / 我的角色 / 方法要点</summary>
+    <div class="intro">
       <div><h3>业务背景</h3>
         <p>平台以积分制售卖 AI 功能用量，收入在订单系统，成本散落在模型调用、渲染、创作者分成等环节。订阅业务上线前，没有一张报表能回答「每条业务赚不赚钱」。</p></div>
       <div><h3>我的角色</h3>
@@ -325,12 +331,12 @@
           <li>单位积分成本可拆解到具体模型，异常波动当日可定位</li>
           <li>数据校验未通过的日期不发布成本数据；报表与订单流水逐笔核对</li>
         </ul></div>
-    </div>
+    </div></details>
     <div class="disclaimer rv"><span>⚠</span><span><b>数据说明：</b>本页为仿真数据。曲线形状参考真实业务趋势，数值已缩放与扰动，不对应任何真实经营数字，仅用于展示分析方法与看板设计。</span></div>
   </header>
 
   <div class="navbar"><div class="row">
-    <a href="#top" data-tab="all" aria-selected="true">总览</a><a href="#subtab" data-tab="sub">订阅线 ROI</a><a href="#ptab" data-tab="buy">购买积分</a><a href="#alloc" data-tab="cost">成本与质量</a>
+    <a href="#top" data-tab="all" aria-selected="true">总览</a><a href="#subtab" data-tab="sub">订阅线 ROI</a><a href="#ptab" data-tab="buy">购买积分</a><a href="#cost" data-tab="cost">成本与质量</a>
     <span class="spacer"></span>
     <div class="seg" role="group" aria-label="时间范围">
       <button data-win="all" aria-pressed="true">全部窗口</button>
@@ -343,74 +349,68 @@
 
   <div id="ovwrap">
   <div class="kpis rv" id="kpis"></div>
-  <div class="card mini rv" id="miniT"><h4>近 7 日明细（仿真）</h4><div id="miniTb"></div></div>
-
   <section id="revenue" class="rv">
-    <div class="sec-head"><span class="sec-no">01</span><h2>收入概览</h2></div>
-    <p class="sec-note">订阅业务上线首日即有日级收入追踪：每日净收入与每日新增付费会员。竖线标注为订阅上线日。</p>
-    <div class="grid2">
-      <div class="card"><h4>每日净收入</h4><p class="sub">订单流水核算 · 仿真口径：美元</p><div id="c_rev"></div><details class="tbl" id="t_rev"></details></div>
+    <div class="grid3">
+      <div class="card mini rv" id="miniT"><h4>近 7 日明细（仿真）</h4><div id="miniTb"></div></div>
+      <div class="card"><h4>每日净收入</h4><p class="sub">订单流水核算 · 美元 · 竖线为订阅上线日</p><div id="c_rev"></div><details class="tbl" id="t_rev"></details></div>
       <div class="card"><h4>每日新增付费会员</h4><p class="sub">会员系统 · 去重人数</p><div id="c_mem"></div><details class="tbl" id="t_mem"></details></div>
+    </div>
+  </section>
+
+  <section id="subroi" class="rv">
+    <div id="roiLegend" class="legend" style="margin:0 0 8px" aria-label="双轨 ROI 共享图例，点击显示或隐藏序列"></div>
+    <div class="grid2">
+      <div class="card"><h4>订阅线 · 收入指数 vs 分摊成本指数</h4><p class="sub">区间首日 = 100 · 与右图同刻度 · 线距即毛利空间</p><div id="c_subroi"></div><details class="tbl" id="t_subroi"></details></div>
+      <div class="card"><h4>购买线 · 等效金额指数 vs 分摊成本指数</h4><p class="sub">等效金额按积分面值折算，非现金收入</p><div id="c_proi"></div><details class="tbl" id="t_proi"></details></div>
     </div>
   </section>
   </div>
 
-  <section id="subroi" class="rv">
-    <div class="sec-head"><span class="sec-no">02</span><h2>双轨 ROI 对照</h2></div>
-    <p class="sec-note">订阅与购买两条业务线并排对照：各画一张「收入指数 vs 分摊成本指数」（各自区间首日 = 100），两图共用同一纵轴刻度与同一组图例。线与线的距离即毛利空间——订阅线收入增长远快于成本，购买线毛利空间较薄，同刻度并置让差距一眼可见。</p>
-    <div id="roiLegend" class="legend" style="margin:0 0 14px" aria-label="双轨 ROI 共享图例，点击显示或隐藏序列"></div>
-    <div class="grid2">
-      <div class="card"><h4>订阅线 · 收入指数 vs 分摊成本指数</h4><p class="sub">同轴双指数线，避免双轴误读</p><div id="c_subroi"></div><details class="tbl" id="t_subroi"></details></div>
-      <div class="card"><h4>购买线 · 等效金额指数 vs 分摊成本指数</h4><p class="sub">等效金额按积分面值折算，非现金收入</p><div id="c_proi"></div><details class="tbl" id="t_proi"></details></div>
-    </div>
-  </section>
-
   <section id="subtab" class="rv" hidden>
-    <div class="sec-head"><h2>订阅线 ROI</h2></div>
-    <p class="sec-note">订阅线单线深挖：上线以来毛利逐日走势、期末 MRR 与收入成本对照。分摊成本含订阅积分所摊的模型调用、渲染与分成。</p>
     <div class="kchips" id="subChips"></div>
     <div class="grid2">
-      <div class="card"><h4>订阅毛利 · 逐日</h4><p class="sub">订阅收入 − 订阅分摊成本（上线以来）</p><div id="c_subprofit"></div></div>
+      <div class="card"><h4>订阅毛利 · 逐日</h4><p class="sub">订阅收入 − 订阅分摊成本 · 含 7 日均线</p><div id="c_subprofit"></div></div>
+      <div class="card"><h4>订阅分摊成本构成 · 逐日</h4><p class="sub">四来源堆叠 · 美元</p><div id="c_subcmix"></div></div>
       <div class="card"><h4>订阅期末 MRR</h4><p class="sub">月度经常性收入走势</p><div id="c_submrr"></div></div>
+      <div class="card"><h4>新增付费会员 · 逐日</h4><p class="sub">订阅上线以来 · 去重人数</p><div id="c_submem"></div></div>
+      <div class="card"><h4>新增会员人均 MRR · 逐日</h4><p class="sub">当日 MRR ÷ 当日新增会员 · 美元/人 · 上行=高价计划渗透</p><div id="c_arpu"></div></div>
+      <div class="card"><h4>双轨收入构成 · 逐日堆叠</h4><p class="sub">订阅收入 + 购买等效 · 美元</p><div id="c_revmix"></div></div>
     </div>
     <details class="tbl" id="t_subprofit"></details>
   </section>
 
   <section id="ptab" class="rv" hidden>
-    <div class="sec-head"><h2>购买积分线</h2></div>
-    <p class="sec-note">积分购买单线深挖：等效金额（按积分面值折算，非现金收入）与分摊成本对照、单位积分成本与消耗构成。</p>
     <div class="kchips" id="buyChips"></div>
     <div class="grid2">
       <div class="card"><h4>购买等效金额 · 逐日</h4><p class="sub">当日购买积分消耗 × 面值 100</p><div id="c_buyeq"></div></div>
       <div class="card"><h4>购买分摊成本 · 逐日</h4><p class="sub">分摊到购买桶的成本</p><div id="c_buycost"></div></div>
+      <div class="card"><h4>购买积分消耗 · 逐日</h4><p class="sub">购买桶消耗量（万积分）</p><div id="c_buycredits"></div></div>
+      <div class="card"><h4>购买收入成本比 · 逐日</h4><p class="sub">等效金额 ÷ 分摊成本 · &gt;1 即毛利为正</p><div id="c_buyratio"></div></div>
     </div>
+    <details class="tbl" id="t_buyeq"></details>
   </section>
 
   <section id="cost" class="rv" hidden>
-    <div class="sec-head"><h2>购买成本</h2></div>
-    <p class="sec-note">左图：每 100 积分分摊成本的指数走势（区间首日 = 100），用于监控定价与成本的匹配度。右图：购买、订阅、赠送三桶的周度消耗构成——分摊比例的来源。</p>
+    <div class="kchips" id="costChips"></div>
     <div class="grid2">
-      <div class="card"><h4>单位积分成本指数</h4><p class="sub">每 100 积分分摊成本 · 区间首日 = 100</p><div id="c_unit"></div><details class="tbl" id="t_unit"></details></div>
+      <div class="card"><h4>成本四来源 · 日级堆叠</h4><p class="sub">模型网关 / 3D 渲染 / 创作者分成 / 模板案例分成</p><div id="c_srcstack"></div><div id="t_srcstack"></div></div>
       <div class="card"><h4>三桶积分消耗构成（周度）</h4><p class="sub">成本按各桶消耗占比分摊的依据</p><div id="c_bucket"></div><details class="tbl" id="t_bucket"></details></div>
     </div>
-    <div class="card" style="margin-top:16px">
-      <div class="dhead"><div><h4>单位成本构成钻取</h4>
-        <p class="sub">点击上方「单位积分成本指数」任意日期，或用播放器逐日回放 · <span id="wdate" class="whint"></span></p></div>
-        <div class="pctrl" role="group" aria-label="逐日播放器">
-          <button class="pbtn" id="pPrev" title="前一日">◀</button>
-          <button class="pbtn" id="pNext" title="后一日">▶</button>
-          <button class="pbtn" id="pPlay" title="自动播放" aria-pressed="false">⏵ 播放</button>
-        </div></div>
-      <div id="c_wf"></div><details class="tbl" id="t_wf"></details>
+    <div class="grid2" style="margin-top:10px">
+      <div class="card"><h4>单位积分成本指数</h4><p class="sub">每 100 积分分摊成本 · 区间首日 = 100 · 点击任意日期钻取</p><div id="c_unit"></div><details class="tbl" id="t_unit"></details></div>
+      <div class="card">
+        <div class="dhead"><div><h4>单位成本构成 · 当日瀑布</h4>
+          <p class="sub"><span id="wdate" class="whint"></span></p></div>
+          <div class="pctrl" role="group" aria-label="逐日播放器">
+            <button class="pbtn" id="pPrev" title="前一日">◀</button>
+            <button class="pbtn" id="pNext" title="后一日">▶</button>
+            <button class="pbtn" id="pPlay" title="自动播放" aria-pressed="false">⏵ 播放</button>
+          </div></div>
+        <div id="c_wf"></div><details class="tbl" id="t_wf"></details>
+      </div>
     </div>
-  </section>
-
-  <section id="alloc" class="rv" hidden>
-    <div class="card" style="margin-bottom:12px"><h4>成本四来源 · 日级堆叠</h4><p class="sub">模型网关调用 / 3D 渲染 / 创作者分成 / 模板与案例分成</p><div id="c_srcstack"></div><div id="t_srcstack"></div></div>
-    <div class="sec-head"><h2>成本分摊与数据质量</h2></div>
-    <p class="sec-note">成本从四类来源按各业务桶当日消耗占比分摊的全景流向——赠送积分无直接收入，其分摊成本为平台自担的增长投入。发布质量逐日留痕：校验未通过的日期不发布成本指标，看板上不留灰色地带。</p>
-    <div class="card"><h4>成本来源 → 业务桶 · 分摊全景</h4><p class="sub">悬浮查看每条流量的金额与占比 · 金额为仿真口径</p><div id="c_sankey" class="sx"></div><details class="tbl" id="t_sankey"></details></div>
-    <div class="card" style="margin-top:16px"><h4>逐日发布质量</h4><p class="sub">每个格子是一天 · 悬浮查看当日校验说明</p><div id="c_qual"></div><p class="qnote">复核与补发全量留痕：进入看板的每一个数字，都能回溯到当日的校验记录与订单核对明细。</p></div>
+    <div class="card" style="margin-top:10px"><h4>成本来源 → 业务桶 · 分摊全景</h4><p class="sub">四类来源按各业务桶当日消耗占比分摊 · 赠送桶无直接收入，为平台自担的增长投入 · 悬浮查看金额与占比</p><div id="c_sankey" class="sx"></div><details class="tbl" id="t_sankey"></details></div>
+    <div class="card" style="margin-top:10px"><h4>逐日发布质量</h4><p class="sub">每格一天 · 校验未通过的日期不发布成本指标 · 悬浮查看当日说明</p><div id="c_qual"></div><p class="qnote">复核与补发全量留痕：进入看板的每一个数字，都能回溯到当日的校验记录与订单核对明细。</p></div>
   </section>
 
   <footer class="foot rv">
@@ -555,6 +555,12 @@ function lineChart(sel, cfg) {
     const t = el('text', { x: m.l - 8, y: Y(v) + 4, 'text-anchor': 'end', 'font-size': 12, fill: C.ink3 });
     t.textContent = cfg.tickFmt ? cfg.tickFmt(v) : v; svg.append(t);
   });
+  if (cfg.refLine != null && cfg.refLine > 0 && cfg.refLine < yMax) {
+    svg.append(el('line', { x1: m.l, x2: m.l + iw, y1: Y(cfg.refLine), y2: Y(cfg.refLine),
+      stroke: C.ink3, 'stroke-width': 1, 'stroke-dasharray': '5 5', opacity: .5 }));
+    const rt = el('text', { x: m.l + 6, y: Y(cfg.refLine) - 5, 'font-size': 11, fill: C.ink3, opacity: .85 });
+    rt.textContent = cfg.refLabel || ('基准 ' + cfg.refLine); svg.append(rt);
+  }
   const nt = Math.min(6, n);
   for (let k = 0; k < nt; k++) {
     const i = Math.round(k * (n - 1) / (nt - 1 || 1));
@@ -569,7 +575,7 @@ function lineChart(sel, cfg) {
     t.textContent = nt2.label; svg.append(t);
   });
 
-  const lps = [];
+  const lps = [], endlab = [];
   const defs = el('defs', {});
   svg.append(defs);
   cfg.series.forEach((s, si) => {
@@ -594,8 +600,15 @@ function lineChart(sel, cfg) {
     svg.append(el('circle', { cx: last[0], cy: last[1], r: 4.5, fill: s.color, stroke: C.surface, 'stroke-width': 2 }));
     const t = el('text', { x: last[0] + 8, y: last[1] + 4, 'font-size': 12, fill: 'var(--ink-2)', 'font-weight': 600 });
     t.textContent = cfg.endFmt ? cfg.endFmt(s.values[s.values.length - 1]) : Math.round(s.values[s.values.length - 1]);
-    svg.append(t);
+    svg.append(t); endlab.push({ t, y: last[1] + 4 });
   });
+  /* 端点标签防碰撞：垂直间距 <14px 时上下推开（购买线两指数收敛到 90/86 处曾叠字） */
+  endlab.sort((a, b) => a.y - b.y);
+  for (let k = 1; k < endlab.length; k++) {
+    const need = 14 - (endlab[k].y - endlab[k - 1].y);
+    if (need > 0) { endlab[k - 1].y -= need / 2; endlab[k].y += need / 2; }
+  }
+  endlab.forEach(o => o.t.setAttribute('y', Math.max(m.t + 10, Math.min(m.t + ih - 2, o.y))));
 
   /* 选中标记（钻取联动；播放器可通过 __unitSync 平移它，不必整图重绘） */
   if (cfg.pick) {
@@ -684,7 +697,7 @@ function lineChart(sel, cfg) {
 /* ---------- 柱状图（单序列，逐柱悬浮） ---------- */
 function colChart(sel, cfg) {
   const box = $(sel); box.textContent = '';
-  const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 12, b: 26, l: 46 };
+  const W = box.clientWidth || 480, H = cfg.h || 260, m = { t: 14, r: 30, b: 26, l: 46 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b, n = cfg.values.length;
   const ticks = niceTicks(Math.max(...cfg.values), 4);
   const yMax = ticks[ticks.length - 1];
@@ -737,8 +750,13 @@ function stackArea(sel, cfg) {
   const cum = cfg.series.map(() => Array(n).fill(0));
   let run = Array(n).fill(0);
   cfg.series.forEach((s, si) => { run = run.map((v, i) => v + s.values[i]); cum[si] = run.slice(); });
-  const ticks = niceTicks(Math.max(1, ...run), 4);
-  const yMax = ticks[ticks.length - 1];
+  /* 头部留白：顶刻度距峰值 <6% 时向上再延一个步长，而不是把刻度整体翻倍
+     （峰值 995 曾被打到 1500 顶，浪费 2/3 纵向分辨率） */
+  const peak = Math.max(1, ...run);
+  const t4 = niceTicks(peak, 4);
+  const step = t4.length > 1 ? t4[t4.length - 1] - t4[t4.length - 2] : t4[t4.length - 1];
+  const yMax = t4[t4.length - 1] >= peak * 1.06 ? t4[t4.length - 1] : t4[t4.length - 1] + step;
+  const ticks = t4;
   const X = i => m.l + (n === 1 ? iw / 2 : i * iw / (n - 1));
   const Y = v => m.t + ih - v / yMax * ih;
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', style: 'display:block' });
@@ -1207,19 +1225,20 @@ function renderKpis(cost, mem, costAll) {
   /* v4.2 近 7 日明细：始终可见的紧凑表，随窗口联动 */
   const byD = {}; cost.forEach(c => { byD[c.d] = c; });
   const tb = $('#miniTb'); tb.textContent = '';
-  const tbl = el('table', {});
-  const thd = el('thead', {}), trh = el('tr', {});
+  const he = t => document.createElement(t); /* HTML 元素不能用 el()——那是 SVG 命名空间 */
+  const tbl = he('table');
+  const thd = he('thead'), trh = he('tr');
   ['日期', '净收入', '新增会员', '期末 MRR', '购买等效', '分摊成本'].forEach(h => {
-    const th = el('th', { scope: 'col' }); th.textContent = h; trh.append(th);
+    const th = he('th'); th.scope = 'col'; th.textContent = h; trh.append(th);
   });
   thd.append(trh); tbl.append(thd);
-  const tbody = el('tbody', {});
+  const tbody = he('tbody');
   mem.slice(-7).reverse().forEach(m => {
     const c = byD[m.d] || {};
-    const tr = el('tr', {});
+    const tr = he('tr');
     [[m.d.slice(5).replace('-', '/')], [money(m.net_rev)], [intc(m.members) + ' 名'],
      [money(m.mrr)], [money((c.p_cr || 0) * 100)], [money((c.s_cost || 0) + (c.p_cost || 0))]]
-      .forEach(([t]) => { const td = el('td', {}); td.textContent = t; tr.append(td); });
+      .forEach(([t]) => { const td = he('td'); td.textContent = t; tr.append(td); });
     tbody.append(tr);
   });
   tbl.append(tbody); tb.append(tbl);
@@ -1281,12 +1300,12 @@ function renderAll(animate) {
   const mem = sliceDays(memAll, WIN);
   renderKpis(cost, mem, costAll);
 
-  lineChart('#c_rev', { h: 250, dates: mem.map(m => m.d), name: '净收入',
+  lineChart('#c_rev', { h: 210, dates: mem.map(m => m.d), name: '净收入',
     area: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     notes: WIN !== '30' ? [{ d: LAUNCH, label: '订阅上线' }] : [],
     series: [{ name: '净收入（仿真）', color: C.s1, values: mem.map(m => m.net_rev) }] });
-  colChart('#c_mem', { h: 250, dates: mem.map(m => m.d), name: '新增会员',
+  colChart('#c_mem', { h: 210, dates: mem.map(m => m.d), name: '新增会员',
     color: C.s1, tipFmt: v => intc(v) + ' 名', head: '日期',
     values: mem.map(m => m.members) });
 
@@ -1308,8 +1327,8 @@ function renderAll(animate) {
   const roiVals = [...(sv[0] ? [] : subS[0].values), ...(sv[1] ? [] : subS[1].values),
     ...(pv[0] ? [] : proS[0].values), ...(pv[1] ? [] : proS[1].values)];
   const roiMax = Math.max(1, ...roiVals);
-  const roiBase = { h: 260, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    noLegend: true, yMax: roiMax, rerender: () => renderAll(false) };
+  const roiBase = { h: 210, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
+    noLegend: true, yMax: roiMax, refLine: 100, refLabel: '首日 = 100', rerender: () => renderAll(false) };
   lineChart('#c_subroi', Object.assign({}, roiBase, {
     dates: subDays.map(c => c.d), name: '订阅ROI指数', key: 'subroi', series: subS }));
   lineChart('#c_proi', Object.assign({}, roiBase, {
@@ -1340,7 +1359,7 @@ function renderAll(animate) {
     });
   }
 
-  lineChart('#c_unit', { h: 250, dates: cost.map(c => c.d), name: '单位成本指数', key: 'unit',
+  lineChart('#c_unit', { h: 210, dates: cost.map(c => c.d), name: '单位成本指数', key: 'unit',
     area: true, color: C.s1, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
     pick: PICKD, onPick: d => { stopPlay(); PICKD = (PICKD === d ? null : d); renderAll(false); },
     series: [{ name: '单位积分成本指数', color: C.s1, values: idx(cost.map(c => c.unit_idx)) }] });
@@ -1365,35 +1384,68 @@ function renderAll(animate) {
   qualityStrip('#c_qual', sliceDays(DATA.quality, WIN));
 
   /* v5 成本四来源日级堆叠 */
-  stackArea('#c_srcstack', { h: 240, dates: sdS.map(r => r.d), key: 'srcstack',
+  stackArea('#c_srcstack', { h: 200, dates: sdS.map(r => r.d), key: 'srcstack',
     name: '成本四来源堆叠',
     series: DATA.src_names.map((nm, i) => ({ name: nm, color: ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s5)'][i],
       values: sdS.map(r => r.s[i]) })) });
 
-  /* v5 订阅线 tab：毛利逐日 + MRR + chips */
+  /* v6 成本 tab chips：总成本 + 四来源占比 + 校验通过天数 */
+  const st4 = DATA.src_names.map((nm, i) => sdS.reduce((a, r) => a + r.s[i], 0));
+  const tot4 = st4.reduce((a, b) => a + b, 0);
+  const qAll = sliceDays(DATA.quality, WIN);
+  chipRow('#costChips', [
+    ['总成本', money(tot4), ''],
+    ...DATA.src_names.map((nm, i) => [nm, money(st4[i]) + ' · ' + (tot4 ? Math.round(st4[i] / tot4 * 100) : 0) + '%', '']),
+    ['校验通过', intc(qAll.filter(q => q.st === 'ok').length) + ' / ' + intc(qAll.length), 'pos'] ]);
+
+  /* v5/v6 订阅线 tab：chips + 6 图 */
   const sbD = cost.filter(c => c.d >= LAUNCH);
   const sbR = sbD.map(c => c.s_cost ? c2rev(costAll, c.d) : 0);
   const sbC = sbD.map(c => c.s_cost);
   const sbP = sbD.map((c, i) => sbR[i] - c.s_cost);
+  const memL = memAll.filter(m2 => m2.d >= LAUNCH);
+  const mrrL = memL.map(m2 => m2.mrr);
   const sumR = sbR.reduce((a, b) => a + b, 0), sumC = sbC.reduce((a, b) => a + b, 0);
   const sumP = sbP.reduce((a, b) => a + b, 0);
   chipRow('#subChips', [
     ['订阅收入', money(sumR), ''], ['分摊成本', money(sumC), ''],
     ['收入成本比', (sumR / Math.max(1, sumC)).toFixed(2) + '×', sumR >= sumC ? 'pos' : 'neg'],
     ['毛利合计', money(sumP), sumP >= 0 ? 'pos' : 'neg'],
-    ['期末 MRR', money(mem[mem.length - 1].mrr), ''],
+    ['期末 MRR', money(memL[memL.length - 1].mrr), ''],
+    ['付费会员', intc(memL[memL.length - 1].members) + ' 名', ''],
+    ['人均 MRR 贡献', '$' + (memL[memL.length - 1].mrr / Math.max(1, memL[memL.length - 1].members)).toFixed(1), 'pos'],
     ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length), ''] ]);
+  const kfmt = v => v >= 1000 ? (v / 1000) + 'k' : v;
   const ma7 = sbP.map((v, i) => { const w = sbP.slice(Math.max(0, i - 6), i + 1);
     return w.reduce((a, b) => a + b, 0) / w.length; });
-  lineChart('#c_subprofit', { h: 260, dates: sbD.map(c => c.d), name: '订阅毛利',
-    area: false, color: C.s3, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+  lineChart('#c_subprofit', { h: 210, dates: sbD.map(c => c.d), name: '订阅毛利',
+    area: false, color: C.s3, tickFmt: kfmt,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '订阅毛利（仿真）', color: C.s3, values: sbP },
              { name: '7日均线', color: 'var(--s1)', values: ma7 }] });
-  lineChart('#c_submrr', { h: 260, dates: mem.map(m2 => m2.d), name: '期末 MRR',
-    stats: false, area: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+  const srcByD = {}; DATA.src_daily.forEach(r => { srcByD[r.d] = r; });
+  const srcc = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s5)'];
+  stackArea('#c_subcmix', { h: 210, dates: sbD.map(c => c.d), name: '订阅分摊成本构成',
+    series: DATA.src_names.map((nm, i) => ({ name: nm, color: srcc[i],
+      values: sbD.map(c => { const r = srcByD[c.d]; const tot = r ? r.s.reduce((a, b) => a + b, 0) : 0;
+        return r ? c.s_cost * r.s[i] / Math.max(tot, 1e-9) : 0; }) })) });
+  lineChart('#c_submrr', { h: 210, dates: memL.map(m2 => m2.d), name: '期末 MRR',
+    stats: false, area: true, color: C.s1, tickFmt: kfmt,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
-    series: [{ name: '期末 MRR', color: C.s1, values: mem.map(m2 => m2.mrr) }] });
+    series: [{ name: '期末 MRR', color: C.s1, values: mrrL }] });
+  colChart('#c_submem', { h: 210, dates: memL.map(m2 => m2.d), name: '新增付费会员',
+    color: C.s1, tipFmt: v => intc(v) + ' 名', head: '日期',
+    values: memL.map(m2 => m2.members) });
+  /* 人均 MRR 贡献：当日 MRR ÷ 当日新增会员。分母是会员数（恒>0 且单调），
+     天然有界（仿真区间 7~108 美元/人），不会像「收入÷MRR/30」那样被上线初期的
+     小基数打出悬崖。上行 = 新增会员买高价计划的比例在涨。 */
+  const arpu = memL.map(m2 => m2.mrr / Math.max(1, m2.members));
+  lineChart('#c_arpu', { h: 210, dates: memL.map(m2 => m2.d), name: '新增会员人均 MRR',
+    color: C.s3, tickFmt: v => '$' + v, tipFmt: v => '$' + v.toFixed(2), endFmt: v => '$' + v.toFixed(2),
+    head: '日期', series: [{ name: '人均 MRR（新增会员口径）', color: C.s3, values: arpu }] });
+  stackArea('#c_revmix', { h: 210, dates: sbD.map(c => c.d), name: '双轨收入构成',
+    series: [{ name: '订阅收入', color: 'var(--s1)', values: sbR },
+             { name: '购买等效', color: 'var(--s3)', values: sbD.map(c => (c.p_cr || 0) * 100) }] });
 
   /* v5 购买积分 tab：等效金额 + 分摊成本 + chips */
   const bEq = cost.map(c => c.p_cr * 100);
@@ -1404,15 +1456,24 @@ function renderAll(animate) {
     ['等效金额', money(sumBE), ''], ['分摊成本', money(sumBC), ''],
     ['收入成本比', (sumBE / Math.max(1, sumBC)).toFixed(2) + '×', sumBE >= sumBC ? 'pos' : 'neg'],
     ['单位积分成本', '$' + (sumBC / Math.max(1, sumPC)).toFixed(2), ''],
+    ['购买消耗', wan(sumPC) + ' 万积分', ''],
     ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length), ''] ]);
-  lineChart('#c_buyeq', { h: 260, dates: cost.map(c => c.d), name: '购买等效金额',
-    area: true, color: C.s3, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+  const kfmt2 = v => v >= 1000 ? (v / 1000) + 'k' : v;
+  lineChart('#c_buyeq', { h: 210, dates: cost.map(c => c.d), name: '购买等效金额',
+    area: true, color: C.s3, tickFmt: kfmt2,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '购买等效金额（仿真）', color: C.s3, values: bEq }] });
-  lineChart('#c_buycost', { h: 260, dates: cost.map(c => c.d), name: '购买分摊成本',
-    area: true, color: C.s2, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+  lineChart('#c_buycost', { h: 210, dates: cost.map(c => c.d), name: '购买分摊成本',
+    area: true, color: C.s2, tickFmt: kfmt2,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '购买分摊成本（仿真）', color: C.s2, values: bCs }] });
+  colChart('#c_buycredits', { h: 210, dates: cost.map(c => c.d), name: '购买积分消耗',
+    color: C.s2, tipFmt: v => wan(v) + ' 万积分', head: '日期',
+    values: cost.map(c => c.p_cr) });
+  const bRatio = bEq.map((v, i) => v / Math.max(1, bCs[i]));
+  lineChart('#c_buyratio', { h: 210, dates: cost.map(c => c.d), name: '购买收入成本比',
+    color: C.s3, tickFmt: v => v, tipFmt: v => v.toFixed(2) + '×', endFmt: v => v.toFixed(2) + '×',
+    head: '日期', series: [{ name: '收入成本比', color: C.s3, values: bRatio }] });
 
   CURCOST = cost;
   renderDrill(cost);
@@ -1508,7 +1569,7 @@ const TABS = [
   { key: 'all',  label: '总览',       secs: ['ovwrap', 'subroi'] },
   { key: 'sub',  label: '订阅线 ROI', secs: ['subtab'] },
   { key: 'buy',  label: '购买积分',   secs: ['ptab'] },
-  { key: 'cost', label: '成本与质量', secs: ['cost', 'alloc'] } ];
+  { key: 'cost', label: '成本与质量', secs: ['cost'] } ];
 let CURTAB = 'all';
 function applyTab(key, jump) {
   CURTAB = key;
