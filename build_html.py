@@ -30,7 +30,7 @@ HTML = r"""<!doctype html>
   :root[data-theme="light"] {
     color-scheme: light;
     --surface-1:#fcfcfb; --page:#f9f9f7;
-    --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+    --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#6f6e68;
     --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
     --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s5:#e87ba4;
     --good:#006300;
@@ -364,7 +364,7 @@ HTML = r"""<!doctype html>
   <section id="revenue" class="rv">
     <div class="grid3">
       <div class="card mini rv" id="miniT"><h4>近 7 日明细（仿真）</h4><div id="miniTb"></div></div>
-      <div class="card"><h4>每日净收入</h4><p class="sub">订单流水核算 · 美元 · 竖线为订阅上线日</p><div id="c_rev"></div><details class="tbl" id="t_rev"></details></div>
+      <div class="card"><h4>每日净收入</h4><p class="sub">柱=当日 · 线=7日均线 · 竖线为订阅上线日</p><div id="c_rev"></div><details class="tbl" id="t_rev"></details></div>
       <div class="card"><h4>每日新增付费会员</h4><p class="sub">会员系统 · 去重人数</p><div id="c_mem"></div><details class="tbl" id="t_mem"></details></div>
     </div>
   </section>
@@ -372,8 +372,8 @@ HTML = r"""<!doctype html>
   <section id="subroi" class="rv">
     <div id="roiLegend" class="legend" style="margin:0 0 8px" aria-label="双轨 ROI 共享图例，点击显示或隐藏序列"></div>
     <div class="grid2">
-      <div class="card"><h4>订阅线 · 收入指数 vs 分摊成本指数</h4><p class="sub">区间首日 = 100 · 与右图同刻度 · 线距即毛利空间</p><div id="c_subroi"></div><details class="tbl" id="t_subroi"></details></div>
-      <div class="card"><h4>购买线 · 等效金额指数 vs 分摊成本指数</h4><p class="sub">等效金额按积分面值折算，非现金收入</p><div id="c_proi"></div><details class="tbl" id="t_proi"></details></div>
+      <div class="card"><h4>订阅线 · 收入指数 vs 分摊成本指数</h4><p class="sub">区间首日 = 100 · 刻度各自归一 · 带色区间即毛利空间</p><div id="c_subroi"></div><details class="tbl" id="t_subroi"></details></div>
+      <div class="card"><h4>购买线 · 等效金额指数 vs 分摊成本指数</h4><p class="sub">等效金额按积分面值折算，非现金收入 · 带色区间即毛利空间</p><div id="c_proi"></div><details class="tbl" id="t_proi"></details></div>
     </div>
   </section>
   </div>
@@ -381,10 +381,10 @@ HTML = r"""<!doctype html>
   <section id="subtab" class="rv" hidden>
     <div class="kchips" id="subChips"></div>
     <div class="grid2">
-      <div class="card"><h4>订阅毛利 · 逐日</h4><p class="sub">订阅收入 − 订阅分摊成本 · 含 7 日均线</p><div id="c_subprofit"></div></div>
+      <div class="card"><h4>订阅毛利 · 逐日</h4><p class="sub">柱=当日毛利（收入−分摊成本） · 线=7日均线</p><div id="c_subprofit"></div></div>
       <div class="card"><h4>订阅分摊成本构成 · 逐日</h4><p class="sub">四来源堆叠 · 美元</p><div id="c_subcmix"></div></div>
       <div class="card"><h4>订阅期末 MRR</h4><p class="sub">月度经常性收入走势</p><div id="c_submrr"></div></div>
-      <div class="card"><h4>新增付费会员 · 逐日</h4><p class="sub">订阅上线以来 · 去重人数</p><div id="c_submem"></div></div>
+      <div class="card"><h4>新增付费会员 · 逐日</h4><p class="sub">柱=当日新增 · 线=7日均线 · 去重人数</p><div id="c_submem"></div></div>
       <div class="card"><h4>新增会员人均 MRR · 逐日</h4><p class="sub">当日 MRR ÷ 当日新增会员 · 美元/人 · 上行=高价计划渗透</p><div id="c_arpu"></div></div>
       <div class="card"><h4>双轨收入构成 · 逐日堆叠</h4><p class="sub">订阅收入 + 购买等效 · 美元</p><div id="c_revmix"></div></div>
     </div>
@@ -393,9 +393,8 @@ HTML = r"""<!doctype html>
 
   <section id="ptab" class="rv" hidden>
     <div class="kchips" id="buyChips"></div>
-    <div class="grid2">
-      <div class="card"><h4>购买等效金额 · 逐日</h4><p class="sub">当日购买积分消耗 × 面值 100</p><div id="c_buyeq"></div></div>
-      <div class="card"><h4>购买分摊成本 · 逐日</h4><p class="sub">分摊到购买桶的成本</p><div id="c_buycost"></div></div>
+    <div class="grid3">
+      <div class="card"><h4>购买收入 vs 分摊成本 · 逐日</h4><p class="sub">柱=等效金额（积分×面值100） · 线=分摊成本</p><div id="c_buyeq"></div></div>
       <div class="card"><h4>购买积分消耗 · 逐日</h4><p class="sub">购买桶消耗量（万积分）</p><div id="c_buycredits"></div></div>
       <div class="card"><h4>购买收入成本比 · 逐日</h4><p class="sub">等效金额 ÷ 分摊成本 · &gt;1 即毛利为正</p><div id="c_buyratio"></div></div>
     </div>
@@ -533,6 +532,10 @@ function countUpVal(node) {
   requestAnimationFrame(fr);
 }
 
+/* ---------- v7 窗口均线：i 处取前 w 日（不足则从头起窗） ---------- */
+function maSeries(vs, w) { return vs.map((v, i) => { const a = vs.slice(Math.max(0, i - (w - 1)), i + 1);
+  return a.reduce((x, y) => x + y, 0) / a.length; }); }
+
 /* ---------- v4.2 图下统计条：主序列 峰值/低点/均值/当前 ---------- */
 function statChips(vs, fmt) {
   const f = fmt || (v => Math.round(v));
@@ -570,7 +573,9 @@ function lineChart(sel, cfg) {
   if (cfg.refLine != null && cfg.refLine > 0 && cfg.refLine < yMax) {
     svg.append(el('line', { x1: m.l, x2: m.l + iw, y1: Y(cfg.refLine), y2: Y(cfg.refLine),
       stroke: C.ink3, 'stroke-width': 1, 'stroke-dasharray': '5 5', opacity: .5 }));
-    const rt = el('text', { x: m.l + 6, y: Y(cfg.refLine) - 5, 'font-size': 11, fill: C.ink3, opacity: .85 });
+    const rt = cfg.refLabelSide === 'left'
+      ? el('text', { x: m.l + 6, y: Y(cfg.refLine) + 14, 'font-size': 11, fill: C.ink3, opacity: .85 })
+      : el('text', { x: m.l + iw - 6, y: Y(cfg.refLine) - 5, 'font-size': 11, fill: C.ink3, opacity: .85, 'text-anchor': 'end' });
     rt.textContent = cfg.refLabel || ('基准 ' + cfg.refLine); svg.append(rt);
   }
   const nt = Math.min(6, n);
@@ -587,12 +592,34 @@ function lineChart(sel, cfg) {
     t.textContent = nt2.label; svg.append(t);
   });
 
-  const lps = [], endlab = [];
+  /* v7 band：双折线之间的中性 wash = 两线差距（如指数对照的毛利空间），不抢序列身份 */
+  if (cfg.band && cfg.series.length >= 2 && !vis[0] && !vis[1]) {
+    const q0 = cfg.series[0].values.map((v, i) => `${X(i)} ${Y(v)}`);
+    const q1 = cfg.series[1].values.map((v, i) => `${X(i)} ${Y(v)}`).reverse();
+    svg.append(el('path', { d: `M ${q0.join(' L ')} L ${q1.join(' L ')} Z`, fill: C.ink3, opacity: .22 }));
+  }
+  const lps = [], endlab = [], barsC = [];
   const defs = el('defs', {});
   svg.append(defs);
+  const slot = iw / n, bwC = Math.min(24, slot * 0.62);
   cfg.series.forEach((s, si) => {
     if (vis[si]) return;  /* 图例隐藏的序列不绘制；颜色跟随实体，不重涂幸存者 */
     const pts = s.values.map((v, i) => [X(i), Y(v)]);
+    /* v7 combo：首序列画圆角柱（同轴同单位），其余仍为折线 —— 条线组合 */
+    if (cfg.combo && si === 0) {
+      s.values.forEach((v, i) => {
+        if (v <= 0) return;
+        const x = m.l + slot * i + (slot - bwC) / 2, hgt = Math.max(1, Y(0) - Y(v)), r = Math.min(4, hgt / 2);
+        const bar = el('path', { fill: s.color, opacity: .78,
+          d: `M ${x} ${Y(0)} V ${Y(v) + r} Q ${x} ${Y(v)} ${x + r} ${Y(v)} H ${x + bwC - r} Q ${x + bwC} ${Y(v)} ${x + bwC} ${Y(v) + r} V ${Y(0)} Z` });
+        svg.append(bar); barsC.push(bar);
+      });
+      const last = pts[pts.length - 1];
+      const t = el('text', { x: last[0] + 8, y: last[1] + 4, 'font-size': 12, fill: 'var(--ink-2)', 'font-weight': 600 });
+      t.textContent = cfg.endFmt ? cfg.endFmt(s.values[s.values.length - 1]) : Math.round(s.values[s.values.length - 1]);
+      svg.append(t); endlab.push({ t, y: last[1] + 4 });
+      return;
+    }
     /* v4：面积用纵向渐变（color@.30 → 透明），线带同色微光 */
     const gid = `lg-${(cfg.key || sel.replace(/[^a-zA-Z0-9]/g, ''))}-${si}`;
     const grad = el('linearGradient', { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
@@ -604,7 +631,10 @@ function lineChart(sel, cfg) {
         [`L ${pts[pts.length - 1][0]} ${Y(0)}`, 'Z']).join(' ');
       svg.append(el('path', { d, fill: `url(#${gid})` }));
     }
-    const lp = el('path', { d: pts.map((p, i) => (i ? 'L' : 'M') + ` ${p[0]} ${p[1]}`).join(' '),
+    const dLine = pts.map((p, i) => (i ? 'L' : 'M') + ` ${p[0]} ${p[1]}`).join(' ');
+    if (cfg.combo) svg.append(el('path', { d: dLine, fill: 'none', stroke: C.surface,
+      'stroke-width': 5.5, opacity: .55, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    const lp = el('path', { d: dLine,
       fill: 'none', stroke: s.color, 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
     lp.style.filter = `drop-shadow(0 1px 7px ${s.color}55)`;
     svg.append(lp); lps.push(lp);
@@ -676,7 +706,7 @@ function lineChart(sel, cfg) {
     const si0 = cfg.series.findIndex((s2, i2) => !vis[i2]);
     if (si0 >= 0) box.append(statChips(cfg.series[si0].values, cfg.tipFmt));
   }
-  if (ANIM && !RM) lps.forEach((p, i) => drawIn(p, 120 + i * 160));
+  if (ANIM && !RM) { if (barsC.length) riseIn(barsC, 60); lps.forEach((p, i) => drawIn(p, 120 + i * 160)); }
 
   let idx = n - 1;
   function show(i, cx, cy) {
@@ -1313,10 +1343,11 @@ function renderAll(animate) {
   renderKpis(cost, mem, costAll);
 
   lineChart('#c_rev', { h: 210, dates: mem.map(m => m.d), name: '净收入',
-    area: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
+    combo: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     notes: WIN !== '30' ? [{ d: LAUNCH, label: '订阅上线' }] : [],
-    series: [{ name: '净收入（仿真）', color: C.s1, values: mem.map(m => m.net_rev) }] });
+    series: [{ name: '净收入（仿真）', color: C.s1, values: mem.map(m => m.net_rev) },
+             { name: '7日均线', color: 'var(--s3)', values: maSeries(mem.map(m => m.net_rev), 7) }] });
   colChart('#c_mem', { h: 210, dates: mem.map(m => m.d), name: '新增会员',
     color: C.s1, tipFmt: v => intc(v) + ' 名', head: '日期',
     values: mem.map(m => m.members) });
@@ -1334,15 +1365,12 @@ function renderAll(animate) {
     { name: '购买等效指数', color: C.s3, values: idx(cost.map(c => c.p_cr * 100)) },
     { name: '购买分摊成本指数', color: C.s2, values: idx(cost.map(c => c.p_cost)) } ];
   const visOf = (key, len) => (HID[key] || Array(len).fill(false)).map(Boolean);
-  const sv = visOf('subroi', 2), pv = visOf('proi', 2);
-  /* 同刻度：只统计当前可见序列；隐藏后两图刻度同步重算，对照关系不破坏 */
-  const roiVals = [...(sv[0] ? [] : subS[0].values), ...(sv[1] ? [] : subS[1].values),
-    ...(pv[0] ? [] : proS[0].values), ...(pv[1] ? [] : proS[1].values)];
-  const roiMax = Math.max(1, ...roiVals);
-  const roiBase = { h: 210, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    noLegend: true, yMax: roiMax, refLine: 100, refLabel: '首日 = 100', rerender: () => renderAll(false) };
+  /* v7.2 两轨各自自适应刻度：共享 800 刻度曾把购买线 90/46 压成贴线、毛利带碎成细条；
+     各自归一到「首日 = 100」后，虚线基准即对照锚点，带色毛利空间在两图都读得出来 */
+  const roiBase = { h: 210, band: true, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
+    noLegend: true, refLine: 100, refLabel: '首日 = 100', rerender: () => renderAll(false) };
   lineChart('#c_subroi', Object.assign({}, roiBase, {
-    dates: subDays.map(c => c.d), name: '订阅ROI指数', key: 'subroi', series: subS }));
+    dates: subDays.map(c => c.d), name: '订阅ROI指数', key: 'subroi', series: subS, refLabelSide: 'left' }));
   lineChart('#c_proi', Object.assign({}, roiBase, {
     dates: cost.map(c => c.d), name: '购买ROI指数', key: 'proi', series: proS }));
 
@@ -1428,13 +1456,11 @@ function renderAll(animate) {
     ['人均 MRR 贡献', '$' + (memL[memL.length - 1].mrr / Math.max(1, memL[memL.length - 1].members)).toFixed(1), 'pos'],
     ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length), ''] ]);
   const kfmt = v => v >= 1000 ? (v / 1000) + 'k' : v;
-  const ma7 = sbP.map((v, i) => { const w = sbP.slice(Math.max(0, i - 6), i + 1);
-    return w.reduce((a, b) => a + b, 0) / w.length; });
   lineChart('#c_subprofit', { h: 210, dates: sbD.map(c => c.d), name: '订阅毛利',
-    area: false, color: C.s3, tickFmt: kfmt,
+    combo: true, color: C.s3, tickFmt: kfmt,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '订阅毛利（仿真）', color: C.s3, values: sbP },
-             { name: '7日均线', color: 'var(--s1)', values: ma7 }] });
+             { name: '7日均线', color: 'var(--s1)', values: maSeries(sbP, 7) }] });
   const srcByD = {}; DATA.src_daily.forEach(r => { srcByD[r.d] = r; });
   const srcc = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s5)'];
   stackArea('#c_subcmix', { h: 210, dates: sbD.map(c => c.d), name: '订阅分摊成本构成',
@@ -1445,9 +1471,11 @@ function renderAll(animate) {
     stats: false, area: true, color: C.s1, tickFmt: kfmt,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '期末 MRR', color: C.s1, values: mrrL }] });
-  colChart('#c_submem', { h: 210, dates: memL.map(m2 => m2.d), name: '新增付费会员',
-    color: C.s1, tipFmt: v => intc(v) + ' 名', head: '日期',
-    values: memL.map(m2 => m2.members) });
+  lineChart('#c_submem', { h: 210, dates: memL.map(m2 => m2.d), name: '新增付费会员',
+    combo: true, color: C.s1, tickFmt: v => v, tipFmt: v => intc(v) + ' 名',
+    endFmt: v => intc(v), head: '日期',
+    series: [{ name: '新增付费会员（仿真）', color: C.s1, values: memL.map(m2 => m2.members) },
+             { name: '7日均线', color: 'var(--s3)', values: maSeries(memL.map(m2 => m2.members), 7) }] });
   /* 人均 MRR 贡献：当日 MRR ÷ 当日新增会员。分母是会员数（恒>0 且单调），
      天然有界（仿真区间 7~108 美元/人），不会像「收入÷MRR/30」那样被上线初期的
      小基数打出悬崖。上行 = 新增会员买高价计划的比例在涨。 */
@@ -1471,21 +1499,19 @@ function renderAll(animate) {
     ['购买消耗', wan(sumPC) + ' 万积分', ''],
     ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length), ''] ]);
   const kfmt2 = v => v >= 1000 ? (v / 1000) + 'k' : v;
-  lineChart('#c_buyeq', { h: 210, dates: cost.map(c => c.d), name: '购买等效金额',
-    area: true, color: C.s3, tickFmt: kfmt2,
+  lineChart('#c_buyeq', { h: 210, dates: cost.map(c => c.d), name: '购买收入 vs 成本',
+    combo: true, color: C.s3, tickFmt: kfmt2,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
-    series: [{ name: '购买等效金额（仿真）', color: C.s3, values: bEq }] });
-  lineChart('#c_buycost', { h: 210, dates: cost.map(c => c.d), name: '购买分摊成本',
-    area: true, color: C.s2, tickFmt: kfmt2,
-    tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
-    series: [{ name: '购买分摊成本（仿真）', color: C.s2, values: bCs }] });
+    series: [{ name: '等效金额（仿真）', color: C.s3, values: bEq },
+             { name: '分摊成本', color: C.s2, values: bCs }] });
   colChart('#c_buycredits', { h: 210, dates: cost.map(c => c.d), name: '购买积分消耗',
     color: C.s2, tipFmt: v => wan(v) + ' 万积分', head: '日期',
     values: cost.map(c => c.p_cr) });
   const bRatio = bEq.map((v, i) => v / Math.max(1, bCs[i]));
   lineChart('#c_buyratio', { h: 210, dates: cost.map(c => c.d), name: '购买收入成本比',
     color: C.s3, tickFmt: v => v, tipFmt: v => v.toFixed(2) + '×', endFmt: v => v.toFixed(2) + '×',
-    head: '日期', series: [{ name: '收入成本比', color: C.s3, values: bRatio }] });
+    head: '日期', refLine: 1, refLabel: '盈亏线 1.0',
+    series: [{ name: '收入成本比', color: C.s3, values: bRatio }] });
 
   CURCOST = cost;
   renderDrill(cost);
