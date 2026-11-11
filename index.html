@@ -507,9 +507,17 @@ const tip = div('tip'); document.body.appendChild(tip);
 function tipShow(node, x, y) {
   tip.textContent = ''; tip.append(node); tip.style.opacity = 1;
   const r = tip.getBoundingClientRect();
-  let L = x + 14; if (L + r.width > innerWidth - 8) L = x - r.width - 14;
+  /* v8.4 读数框约束在所属卡片内：默认在十字线右侧，越出卡片右/下缘就向左/上翻——
+     不跨卡遮挡邻图，也不盖本图右端的端点直标（tip 自身 pointer-events:none，elementFromPoint 穿透） */
+  const under = document.elementFromPoint(x, y);
+  const card = under && under.closest && under.closest('.card');
+  const cr = card && card.getBoundingClientRect();
+  const rb = cr ? cr.right - 10 : innerWidth - 8;
+  const bb = cr ? cr.bottom - 10 : innerHeight - 8;
+  let L = x + 14; if (L + r.width > rb) L = x - r.width - 14;
+  let T = y + 12; if (T + r.height > bb) T = y - r.height - 12;
   tip.style.left = Math.max(8, L) + 'px';
-  tip.style.top = Math.min(innerHeight - r.height - 8, Math.max(8, y + 12)) + 'px';
+  tip.style.top = Math.max(8, T) + 'px';
 }
 function tipRow(color, value, name) {
   const r = div('r'), k = div(); k.className = 'k'; k.style.background = color;
