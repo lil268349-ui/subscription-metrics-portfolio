@@ -24,6 +24,7 @@ HTML = r"""<!doctype html>
     --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#98968f;
     --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s5:#d55181;
+    --s1h:#7cb0ee; --s3h:#3fc491;   /* 同色相明度阶梯：柱/线同实体时均线用 *h */
     --good:#0ca30c;
     --tooltip-bg:#242423; --tooltip-ring:rgba(255,255,255,.16);
   }
@@ -33,6 +34,7 @@ HTML = r"""<!doctype html>
     --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#6f6e68;
     --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
     --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s5:#e87ba4;
+    --s1h:#1d5aa8; --s3h:#0e7a54;   /* 同色相明度阶梯（浅色主题向深走） */
     --good:#006300;
     --tooltip-bg:#ffffff; --tooltip-ring:rgba(11,11,11,.14);
   }
@@ -492,7 +494,7 @@ HTML = r"""<!doctype html>
 
 <script>
 const DATA = __DATA__;
-const C = { s1:'var(--s1)', s2:'var(--s2)', s3:'var(--s3)', ink3:'var(--ink-3)',
+const C = { s1:'var(--s1)', s2:'var(--s2)', s3:'var(--s3)', s1h:'var(--s1h)', s3h:'var(--s3h)', ink3:'var(--ink-3)',
             grid:'var(--grid)', axis:'var(--axis)', surface:'var(--surface-1)' };
 
 /* ---------- 工具 ---------- */
@@ -1551,7 +1553,7 @@ function renderAll(animate) {
     notes: (!CUST && WIN !== '30') || (CUST && CUST.from <= LAUNCH && LAUNCH <= CUST.to)
       ? [{ d: LAUNCH, label: '订阅上线' }] : [],
     series: [{ name: '净收入（仿真）', color: C.s1, values: mem.map(m => m.net_rev) },
-             { name: '7日均线', color: 'var(--s3)', values: maSeries(mem.map(m => m.net_rev), 7) }] });
+             { name: '7日均线', color: C.s1h, values: maSeries(mem.map(m => m.net_rev), 7) }] });
   colChart('#c_mem', { h: 210, dates: mem.map(m => m.d), name: '新增会员',
     color: C.s1, tipFmt: v => intc(v) + ' 名', head: '日期',
     values: mem.map(m => m.members) });
@@ -1665,7 +1667,7 @@ function renderAll(animate) {
     combo: true, color: C.s3, tickFmt: kfmt, onPick: d => openDrill(d),
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '订阅毛利（仿真）', color: C.s3, values: sbP },
-             { name: '7日均线', color: 'var(--s1)', values: maSeries(sbP, 7) }] });
+             { name: '7日均线', color: C.s3h, values: maSeries(sbP, 7) }] });
   const srcByD = {}; DATA.src_daily.forEach(r => { srcByD[r.d] = r; });
   const srcc = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s5)'];
   stackArea('#c_subcmix', { h: 210, dates: sbD.map(c => c.d), name: '订阅分摊成本构成',
@@ -1680,7 +1682,7 @@ function renderAll(animate) {
     combo: true, color: C.s1, tickFmt: v => v, tipFmt: v => intc(v) + ' 名', onPick: d => openDrill(d),
     endFmt: v => intc(v), head: '日期',
     series: [{ name: '新增付费会员（仿真）', color: C.s1, values: memL.map(m2 => m2.members) },
-             { name: '7日均线', color: 'var(--s3)', values: maSeries(memL.map(m2 => m2.members), 7) }] });
+             { name: '7日均线', color: C.s1h, values: maSeries(memL.map(m2 => m2.members), 7) }] });
   /* 人均 MRR 贡献：当日 MRR ÷ 当日新增会员。分母是会员数（恒>0 且单调），
      天然有界（仿真区间 7~108 美元/人），不会像「收入÷MRR/30」那样被上线初期的
      小基数打出悬崖。上行 = 新增会员买高价计划的比例在涨。 */
