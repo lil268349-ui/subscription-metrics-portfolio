@@ -153,6 +153,16 @@
   .tip .r { display:flex; align-items:center; gap:7px; margin-top:2px; }
   .tip .k { width:12px; height:2px; border-radius:1px; flex:none; }
   .tip .v { color:var(--ink-1); font-weight:600; }
+  /* v8.3 悬停语境行：读数之外再给 环比 + 窗口占比 */
+  .tip .tctx { border-top:1px solid var(--tooltip-ring); margin-top:5px; padding-top:4px;
+    font-size:11px; color:var(--ink-3); white-space:nowrap; }
+  /* v8.3 抽屉趋势语境 */
+  .dspark { margin:2px 0 6px; }
+  .dsparkcap { font-size:11px; color:var(--ink-3); margin-top:2px; }
+  /* v8.3 近 7 日明细行可点击下钻 */
+  #miniTb tbody tr { cursor:pointer; transition:background .15s; }
+  #miniTb tbody tr:hover { background:var(--glow); }
+  #miniTb tbody tr:focus-visible { outline:2px solid var(--s1); outline-offset:-2px; }
 
   /* ---------- 阅读进度条 ---------- */
   #prog { position:fixed; top:0; left:0; height:2px; width:0; z-index:60;
@@ -509,6 +519,33 @@ function tipRow(color, value, name) {
 }
 function tipHide() { tip.style.opacity = 0; }
 function tipDate(d) { const t = document.createElement('div'); t.className = 't'; t.textContent = d; return t; }
+/* v8.3 悬停语境行：数值之外再读出两层信息——vs 前一日环比、占窗口合计的比重。
+   指数/比率序列占比无意义，由 cfg.share=false 关掉；环比对首日也不给（无基期） */
+function tipCtx(vals, i, wantShare) {
+  if (!vals || i < 0 || i >= vals.length) return null;
+  const parts = [];
+  if (i > 0 && isFinite(vals[i - 1]) && vals[i - 1] !== 0) {
+    const pct = (vals[i] / vals[i - 1] - 1) * 100;
+    parts.push('vs 前一日 ' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%');
+  }
+  if (wantShare !== false) {
+    const tot = vals.reduce((a, b) => a + (isFinite(b) ? b : 0), 0);
+    if (tot > 0 && isFinite(vals[i])) parts.push('占窗口 ' + (vals[i] / tot * 100).toFixed(1) + '%');
+  }
+  if (!parts.length) return null;
+  const t = document.createElement('div'); t.className = 'tctx'; t.textContent = parts.join(' · ');
+  return t;
+}
+/* ---------- v8.3 联动十字线：悬停任一时间序列图，同窗口的其他图以虚线标出同一天，
+   一次悬停即可跨图对齐阅读。XREG 每轮 renderAll 重建；源图自己的虚线一律清掉
+   （源用实线 cross，残影虚线会与 cross 叠画；probe XCLEAR 模式抓过这个残留 bug） ---------- */
+let XREG = [];
+function xSync(d, srcSvg) {
+  XREG.forEach(r => { if (r.svg === srcSvg) r.clear(); else r.set(d); });
+}
+function xClear() {
+  XREG.forEach(r => r.clear());
+}
 function legendRow(items) {
   const lg = div('legend');
   items.forEach(it => {
@@ -608,7 +645,7 @@ function attachBrush(hit, svg, o) {
     }
     o.show(i, e.clientX, e.clientY);
   });
-  hit.addEventListener('pointerleave', () => { o.cross.setAttribute('visibility', 'hidden'); tipHide(); });
+  hit.addEventListener('pointerleave', () => { o.cross.setAttribute('visibility', 'hidden'); tipHide(); xClear(); });
   hit.addEventListener('pointerup', e => {
     const a = bx; bx = null;
     o.selr.setAttribute('opacity', 0);
@@ -762,6 +799,20 @@ function lineChart(sel, cfg) {
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '折线图');
   hit.setAttribute('data-hit', '1');   /* v8.2 游标定位锚点：drawDrillCursor 从这里读绘图区几何 */
   svg.__dates = cfg.dates;             /* v8.2 游标按日期反查 index，翻日/重渲染都不失效 */
+  /* v8.3 联动十字线：别的图被悬停时，这里画同日期的细虚线（pointer-events:none 不挡交互） */
+  const syncG = el('g', { 'pointer-events': 'none', visibility: 'hidden' });
+  /* 底垫 surface 色晕：灰带/柱群等同族背景上仍可读（同 v7 combo 线晕手法） */
+  syncG.append(
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.surface, 'stroke-width': 3, 'stroke-dasharray': '3 3', opacity: .85 }),
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: .9 }));
+  svg.append(syncG);
+  XREG.push({ svg,
+    set: d => { const j = cfg.dates.indexOf(d);
+      if (j < 0) { syncG.setAttribute('visibility', 'hidden'); return; }
+      syncG.setAttribute('transform', 'translate(' + X(j) + ' 0)');
+      syncG.setAttribute('visibility', 'visible'); },
+    clear: () => syncG.setAttribute('visibility', 'hidden') });
+  svg.addEventListener('pointerleave', () => xClear());
   svg.append(hit);
 
   if (cfg.series.length >= 2 && !cfg.noLegend) {
@@ -803,7 +854,10 @@ function lineChart(sel, cfg) {
       if (!vis[si]) return;
       tt.append(tipRow(s.color, (cfg.tipFmt || (v => Math.round(v)))(s.values[i]), s.name));
     });
+    const vs0 = cfg.series[cfg.series.findIndex((s, si) => !vis[si])];
+    if (vs0) { const c2 = tipCtx(vs0.values, i, cfg.share); if (c2) tt.append(c2); }
     tipShow(tt, cx, cy);
+    xSync(cfg.dates[i], svg);   /* v8.3 广播同日，其余图出联动虚线 */
   }
   /* v8.2 下钻分流：firePick 记下触发图（LASTPICK 供 openDrill 挂当日游标），再走 onPick */
   const firePick = i2 => { LASTPICK = sel; if (cfg.onPick) cfg.onPick(cfg.dates[i2]); };
@@ -841,12 +895,27 @@ function colChart(sel, cfg) {
       d: `M ${x} ${Y(0)} V ${Y(v) + r} Q ${x} ${Y(v)} ${x + r} ${Y(v)} H ${x + bw - r} Q ${x + bw} ${Y(v)} ${x + bw} ${Y(v) + r} V ${Y(0)} Z` });
     svg.append(bar); bars.push(bar);
   });
+  /* v8.3 柱图同样加入联动十字线：位置按柱槽中心换算 */
+  const syncG = el('g', { 'pointer-events': 'none', visibility: 'hidden' });
+  syncG.append(
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.surface, 'stroke-width': 3, 'stroke-dasharray': '3 3', opacity: .85 }),
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: .9 }));
+  svg.append(syncG);
+  XREG.push({ svg,
+    set: d => { const j = cfg.dates.indexOf(d);
+      if (j < 0) { syncG.setAttribute('visibility', 'hidden'); return; }
+      syncG.setAttribute('transform', 'translate(' + (m.l + slot * j + slot / 2) + ' 0)');
+      syncG.setAttribute('visibility', 'visible'); },
+    clear: () => syncG.setAttribute('visibility', 'hidden') });
+  svg.addEventListener('pointerleave', () => xClear());
   cfg.dates.forEach((d, i) => {
     const x = m.l + slot * i;
     const hit = el('rect', { x, y: m.t, width: Math.max(24, slot), height: ih, fill: 'transparent' });
     hit.addEventListener('pointermove', e => {
       const tt = tipDate(d); tt.append(tipRow(cfg.color, cfg.tipFmt(cfg.values[i]), cfg.name));
+      const c2 = tipCtx(cfg.values, i, cfg.share); if (c2) tt.append(c2);
       tipShow(tt, e.clientX, e.clientY);
+      xSync(d, svg);
     });
     hit.addEventListener('pointerleave', tipHide);
     if (cfg.onPick) {   /* v8 柱图点击日期 → 下钻抽屉（LASTPICK 供当日游标定位触发图） */
@@ -919,6 +988,20 @@ function stackArea(sel, cfg) {
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '堆叠面积图');
   hit.setAttribute('data-hit', '1');   /* v8.2 游标定位锚点：drawDrillCursor 从这里读绘图区几何 */
   svg.__dates = cfg.dates;             /* v8.2 游标按日期反查 index，翻日/重渲染都不失效 */
+  /* v8.3 联动十字线：别的图被悬停时，这里画同日期的细虚线（pointer-events:none 不挡交互） */
+  const syncG = el('g', { 'pointer-events': 'none', visibility: 'hidden' });
+  /* 底垫 surface 色晕：灰带/柱群等同族背景上仍可读（同 v7 combo 线晕手法） */
+  syncG.append(
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.surface, 'stroke-width': 3, 'stroke-dasharray': '3 3', opacity: .85 }),
+    el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: .9 }));
+  svg.append(syncG);
+  XREG.push({ svg,
+    set: d => { const j = cfg.dates.indexOf(d);
+      if (j < 0) { syncG.setAttribute('visibility', 'hidden'); return; }
+      syncG.setAttribute('transform', 'translate(' + X(j) + ' 0)');
+      syncG.setAttribute('visibility', 'visible'); },
+    clear: () => syncG.setAttribute('visibility', 'hidden') });
+  svg.addEventListener('pointerleave', () => xClear());
   svg.append(hit);
   let idx = n - 1;
   function show(i, cx, cy) {
@@ -932,7 +1015,9 @@ function stackArea(sel, cfg) {
       tt.append(tipRow(s.color, money(s.values[i]), s.name));
     });
     tt.append(tipRow(C.ink3, money(tot), '合计'));
+    const c2 = tipCtx(run, i, true); if (c2) tt.append(c2);   /* v8.3 合计的环比与占比 */
     tipShow(tt, cx, cy);
+    xSync(cfg.dates[i], svg);
   }
   /* v8.2 与折线图共用 attachBrush（分流逻辑单处实现），firePick 同样记触发图 */
   const firePick = i2 => { LASTPICK = sel; if (cfg.onPick) cfg.onPick(cfg.dates[i2]); };
@@ -1309,7 +1394,7 @@ function addTableStack(sel, cfg) {
 }
 
 /* ---------- 迷你走势（12 点重采样 · 实体弱色描线 + 当期强调点，宽度自适应卡片） ---------- */
-function spark(vals, color, w) {
+function spark(vals, color, w, hiIdx) {
   const M = 12;
   const vs = vals.length > M
     ? Array.from({ length: M }, (_, i) => vals[Math.round(i * (vals.length - 1) / (M - 1))]) : vals;
@@ -1317,13 +1402,16 @@ function spark(vals, color, w) {
   const mn = Math.min(...vs), mx = Math.max(...vs);
   const X = i => 2 + i * (W - 8) / (vs.length - 1);
   const Y = v => 5 + (H - 10) * (1 - (v - mn) / ((mx - mn) || 1));
+  /* v8.3 hiIdx：原始序列上要强调的点位（默认末日）；重采样后映射到就近采样点 */
+  const hi = hiIdx == null ? vs.length - 1
+    : Math.round(hiIdx / Math.max(1, vals.length - 1) * (vs.length - 1));
   const s = el('svg', { viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true', preserveAspectRatio: 'xMidYMid meet' });
   s.append(el('path', { d: [`M ${X(0)} ${H - 3}`].concat(vs.map((v, i) => `L ${X(i)} ${Y(v)}`),
     [`L ${X(vs.length - 1)} ${H - 3}`, 'Z']).join(' '), fill: color, opacity: .16 }));
   s.append(el('path', { d: vs.map((v, i) => (i ? 'L' : 'M') + ` ${X(i)} ${Y(v)}`).join(' '),
     fill: 'none', stroke: color, 'stroke-opacity': .88, 'stroke-width': 2.2,
     'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
-  s.append(el('circle', { cx: X(vs.length - 1), cy: Y(vs[vs.length - 1]), r: 4, fill: color, stroke: C.surface, 'stroke-width': 2 }));
+  s.append(el('circle', { cx: X(hi), cy: Y(vs[hi]), r: 4, fill: color, stroke: C.surface, 'stroke-width': 2 }));
   return s;
 }
 
@@ -1361,6 +1449,12 @@ function renderKpis(cost, mem, costAll) {
     [[m.d.slice(5).replace('-', '/')], [money(m.net_rev)], [intc(m.members) + ' 名'],
      [money(m.mrr)], [money((c.p_cr || 0) * 100)], [money((c.s_cost || 0) + (c.p_cost || 0))]]
       .forEach(([t]) => { const td = he('td'); td.textContent = t; tr.append(td); });
+    /* v8.3 行点击 = 当日下钻：表格读数与抽屉拆解闭环，键盘同样可达 */
+    tr.tabIndex = 0; tr.title = '点击查看当日拆解';
+    tr.style.cursor = 'pointer';
+    const go = () => openDrill(m.d);
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
     tbody.append(tr);
   });
   tbl.append(tbody); tb.append(tbl);
@@ -1423,6 +1517,7 @@ function renderKpis(cost, mem, costAll) {
 function renderAll(animate) {
   ANIM = animate !== false;
   __unitSync = null;   /* 旧闭包引用旧几何，先清掉；有选中标记时折线图会重新注册 */
+  XREG = [];           /* v8.3 联动十字线注册表同样随渲染重建 */
   tipHide();
   const costAll = DATA.cost, memAll = DATA.mem;
   const cost = sliceDays(costAll, WIN);
@@ -1457,7 +1552,7 @@ function renderAll(animate) {
   /* v7.2 两轨各自自适应刻度：共享 800 刻度曾把购买线 90/46 压成贴线、毛利带碎成细条；
      各自归一到「首日 = 100」后，虚线基准即对照锚点，带色毛利空间在两图都读得出来 */
   const roiBase = { h: 210, band: true, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    noLegend: true, refLine: 100, refLabel: '首日 = 100', onPick: d => openDrill(d),
+    noLegend: true, refLine: 100, refLabel: '首日 = 100', onPick: d => openDrill(d), share: false,
     rerender: () => renderAll(false) };
   lineChart('#c_subroi', Object.assign({}, roiBase, {
     dates: subDays.map(c => c.d), name: '订阅ROI指数', key: 'subroi', series: subS, refLabelSide: 'left' }));
@@ -1490,7 +1585,7 @@ function renderAll(animate) {
   }
 
   lineChart('#c_unit', { h: 210, dates: cost.map(c => c.d), name: '单位成本指数', key: 'unit',
-    area: true, color: C.s1, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
+    area: true, color: C.s1, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期', share: false,
     pick: PICKD, onPick: d => { stopPlay(); PICKD = (PICKD === d ? null : d); renderAll(false); },
     series: [{ name: '单位积分成本指数', color: C.s1, values: idx(cost.map(c => c.unit_idx)) }] });
 
@@ -1558,7 +1653,7 @@ function renderAll(animate) {
       values: sbD.map(c => { const r = srcByD[c.d]; const tot = r ? r.s.reduce((a, b) => a + b, 0) : 0;
         return r ? c.s_cost * r.s[i] / Math.max(tot, 1e-9) : 0; }) })) });
   lineChart('#c_submrr', { h: 210, dates: memL.map(m2 => m2.d), name: '期末 MRR',
-    stats: false, area: true, color: C.s1, tickFmt: kfmt, onPick: d => openDrill(d),
+    stats: false, area: true, color: C.s1, tickFmt: kfmt, onPick: d => openDrill(d), share: false,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '期末 MRR', color: C.s1, values: mrrL }] });
   lineChart('#c_submem', { h: 210, dates: memL.map(m2 => m2.d), name: '新增付费会员',
@@ -1572,6 +1667,7 @@ function renderAll(animate) {
   const arpu = memL.map(m2 => m2.mrr / Math.max(1, m2.members));
   lineChart('#c_arpu', { h: 210, dates: memL.map(m2 => m2.d), name: '新增会员人均 MRR',
     color: C.s3, tickFmt: v => '$' + v, tipFmt: v => '$' + v.toFixed(2), endFmt: v => '$' + v.toFixed(2),
+    share: false,
     onPick: d => openDrill(d),
     head: '日期', series: [{ name: '人均 MRR（新增会员口径）', color: C.s3, values: arpu }] });
   stackArea('#c_revmix', { h: 210, dates: sbD.map(c => c.d), name: '双轨收入构成',
@@ -1601,6 +1697,7 @@ function renderAll(animate) {
   const bRatio = bEq.map((v, i) => v / Math.max(1, bCs[i]));
   lineChart('#c_buyratio', { h: 210, dates: cost.map(c => c.d), name: '购买收入成本比',
     color: C.s3, tickFmt: v => v, tipFmt: v => v.toFixed(2) + '×', endFmt: v => v.toFixed(2) + '×',
+    share: false,
     onPick: d => openDrill(d),
     head: '日期', refLine: 1, refLabel: '盈亏线 1.0',
     series: [{ name: '收入成本比', color: C.s3, values: bRatio }] });
@@ -1700,6 +1797,17 @@ function renderDrillDay() {
   $('#dPrev').disabled = i <= 0;
   $('#dNext').disabled = i >= ALLD.length - 1;
   const b = $('#dbody'); b.textContent = '';
+  /* v8.3 趋势语境：以当日为终点的 30 日滑窗迷你走势，先看形状再看数字 */
+  const s30 = ALLD.slice(Math.max(0, i - 29), i + 1);
+  if (s30.length >= 2) {
+    b.append(dSec('近 30 天净收入走势'));
+    const sw = div('dspark');
+    sw.append(spark(s30.map(dd => ((dMem[dd] || {}).net_rev) || 0), C.s1,
+      Math.max(160, b.clientWidth - 36), s30.length - 1));
+    const cap = document.createElement('div'); cap.className = 'dsparkcap';
+    cap.textContent = md(s30[0]) + ' – ' + md(d) + ' · 滑窗截至当日，高亮点为当日';
+    sw.append(cap); b.append(sw);
+  }
   b.append(dSec('收入'));
   b.append(kvRow('净收入', money(m2.net_rev || 0), dlFmt(m2.net_rev || 0, m0.net_rev || 0)));
   b.append(kvRow('购买等效', money((c.p_cr || 0) * 100), dlFmt((c.p_cr || 0) * 100, (c0.p_cr || 0) * 100)));
