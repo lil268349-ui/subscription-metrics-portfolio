@@ -111,7 +111,8 @@ HTML = r"""<!doctype html>
   .tile.khero { grid-column:span 2; }
   .tile .d { font-size:12px; color:var(--ink-3); min-height:18px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .tile .d .up { color:var(--good); font-weight:600; }
+  /* v8.7 说明行环比不再单独上色：一排灰字里混一个绿字读似渲染不一致，方向由 +/- 号承载
+     （状态色只留给抽屉 delta 整列——整列同构时颜色才是编码，散落单点只是噪音） */
   .tile svg { display:block; margin-top:8px; width:100%; height:30px; }
 
   /* ---------- v5 业务线 Tab（导航栏内联，全局唯一 tab 系统） ---------- */
@@ -289,16 +290,13 @@ HTML = r"""<!doctype html>
     .card, .tile, .intro, .disclaimer, .seg, .iconbtn { background:var(--surface-1); }
   }
 
-  /* v4 KPI hero 卡：渐变底 + 加强顶缘光线 + 渐变数值 */
+  /* v4 KPI hero 卡：渐变底 + 加强顶缘光线（v8.7 数值回归正文色） */
   .tile.khero { background:linear-gradient(135deg, rgba(57,135,229,.17), rgba(25,158,112,.06) 58%, transparent);
     border-color:rgba(57,135,229,.34);
     box-shadow:0 14px 40px -22px var(--glow), inset 0 1px 0 var(--edge); }
   .tile.khero::before { opacity:1; left:5%; right:5%; height:2px; }
-  @supports ((-webkit-background-clip:text) or (background-clip:text)) {
-    .tile.khero .v { width:fit-content;
-      background:linear-gradient(92deg, var(--ink-1) 0%, var(--s1) 58%, var(--s3) 100%);
-      -webkit-background-clip:text; background-clip:text; color:transparent; }
-  }
+  /* v8.7 数值渐变字下线：同一个数字白→蓝→绿渐变，读起来像渲染不一致；
+     大数字回归纯正文色，科技感由卡底渐变与顶缘光线承担 */
 
   /* 玻璃导航条 */
   .navbar { background:transparent; border-bottom-color:transparent; }
