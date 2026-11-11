@@ -180,6 +180,39 @@
   .qstrip { display:flex; gap:3px; margin:10px 0 6px; }
   .qc { flex:1; max-width:26px; aspect-ratio:1; border-radius:3px; cursor:pointer; }
   .qc:hover { transform:scale(1.18); }
+  /* v8 日期下钻抽屉 + 自定义窗口 chip */
+  #ovl { position:fixed; inset:0; background:rgba(0,0,0,.45); opacity:0; pointer-events:none; transition:opacity .25s; z-index:60; }
+  #ovl.on { opacity:1; pointer-events:auto; }
+  #drill { position:fixed; top:0; right:0; height:100%; width:min(400px,92vw); z-index:61;
+    background:var(--surface-1); border-left:1px solid var(--glass-bd);
+    box-shadow:-24px 0 60px -30px rgba(0,0,0,.55);
+    transform:translateX(105%); transition:transform .28s cubic-bezier(.4,0,.2,1);
+    display:flex; flex-direction:column; }
+  #drill.on { transform:none; }
+  #drill header { display:flex; align-items:center; gap:8px; padding:14px 14px 11px 16px; border-bottom:1px solid var(--grid); }
+  #drill header b { font-size:15px; color:var(--ink-1); font-variant-numeric:tabular-nums; }
+  #drill header .dnav { margin-left:auto; display:flex; gap:5px; }
+  #drill header .dnav button, #custX { background:var(--glass); border:1px solid var(--glass-bd); color:var(--ink-2);
+    border-radius:7px; font-size:12.5px; padding:4px 9px; cursor:pointer; }
+  #drill header .dnav button:hover:not(:disabled) { color:var(--ink-1); border-color:var(--s1); }
+  #drill header .dnav button:disabled { opacity:.35; cursor:default; }
+  #dbody { overflow:auto; padding:10px 16px 22px; flex:1; }
+  .kv { display:grid; grid-template-columns:1fr auto auto; gap:2px 10px; padding:6px 0;
+    border-bottom:1px dashed var(--grid); font-size:13px; align-items:baseline; }
+  .kv .k2 { color:var(--ink-2); }
+  .kv .v2 { color:var(--ink-1); font-weight:600; font-variant-numeric:tabular-nums; text-align:right; }
+  .kv .dl { font-size:11.5px; font-weight:600; min-width:46px; text-align:right; font-variant-numeric:tabular-nums; }
+  .kv .dl.up { color:var(--good); }
+  .kv .dl.dn { color:var(--s2); }
+  .kv .dl.eq { color:var(--ink-3); }
+  .dsec { margin:13px 0 2px; font-size:11px; letter-spacing:.16em; color:var(--ink-3); }
+  .dfoot { margin-top:16px; font-size:11.5px; color:var(--ink-3); line-height:1.55; }
+  .cchip { display:flex; align-items:center; gap:5px; padding:3px 4px 3px 10px; border-radius:8px;
+    border:1px dashed var(--s1); color:var(--ink-1); font-size:12.5px; background:var(--glow); }
+  .cchip[hidden] { display:none; }
+  .cchip b { font-weight:600; font-variant-numeric:tabular-nums; }
+  .cchip #custX { padding:1px 6px; font-size:11px; }
+  @media (prefers-reduced-motion: reduce) { #drill, #ovl { transition:none; } }
   .qc:focus-visible { outline:2px solid var(--s1); outline-offset:1px; }
   .qends { display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-3); }
   .qnote { font-size:12.5px; color:var(--ink-2); margin-top:12px;
@@ -311,6 +344,18 @@
 <body>
 <div id="prog"></div>
 <nav class="rail" id="rail" aria-label="章节导航"></nav>
+<div id="ovl" aria-hidden="true"></div>
+<aside id="drill" role="dialog" aria-modal="true" aria-labelledby="ddate" aria-hidden="true">
+  <header>
+    <b id="ddate">—</b>
+    <div class="dnav">
+      <button id="dPrev" title="前一日">‹</button>
+      <button id="dNext" title="后一日">›</button>
+      <button id="dclose" title="关闭" aria-label="关闭下钻面板">✕</button>
+    </div>
+  </header>
+  <div id="dbody"></div>
+</aside>
 <button id="totop" title="回到顶部" aria-label="回到顶部">↑</button>
 <div class="wrap">
 
@@ -342,6 +387,7 @@
       <button data-win="all" aria-pressed="true">全部窗口</button>
       <button data-win="30" aria-pressed="false">近 30 天</button>
       <button data-win="launch" aria-pressed="false">订阅上线以来</button>
+      <span class="cchip" id="custChip" hidden><b id="custTxt"></b><button id="custX" title="清除自定义窗口" aria-label="清除自定义窗口">✕</button></span>
     </div>
     <button class="iconbtn" id="themeBtn" title="切换深浅色">◐</button>
   </div></div>
@@ -416,7 +462,7 @@
     <h4>方法注记</h4>
     <p>每日已纳入成本（模型网关调用、3D 渲染、创作者分成）乘以各桶消耗占比得到分摊成本；跨日只求和。单位成本 = 区间分摊成本 ÷ 区间消耗，不做日均的简单平均。数据校验未通过的日期不发布成本指标；报表数字与订单流水逐笔核对。</p>
     <p class="fine">本页数据为仿真数据，仅用于作品展示 · 图表与代码可复现 · 生成器与数据形状见仓库<br>
-    交互：深浅主题 · 时间窗口筛选 · 悬浮十字线读数 · 共享图例跨图显隐（双轨 ROI 两图联动） · 单位成本按日钻取与逐日播放 · 冲积分摊全景 · 每图数据表孪生 · 键盘 ←/→/Enter</p>
+    交互：深浅主题 · 时间窗口筛选（含图上拖选自定义区间） · 点击日期下钻当日全量拆解 · 悬浮十字线读数 · 共享图例跨图显隐（双轨 ROI 两图联动） · 单位成本按日钻取与逐日播放 · 冲积分摊全景 · 每图数据表孪生 · 键盘 ←/→/Enter/Esc</p>
   </footer>
 </div>
 
@@ -473,6 +519,7 @@ function legendRow(items) {
 
 /* ---------- 全局状态与动效 ---------- */
 let WIN = 'all', PICKD = null, ANIM = true;
+let CUST = null;                /* v8 自定义时间窗 {from,to}；非空时优先于预设 WIN（赋值见筛选区） */
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HID = {};                 /* 图例显隐状态：{ 图表key: [序列是否隐藏] } */
 let PLAY = null;                /* 钻取自动播放定时器 */
@@ -661,6 +708,9 @@ function lineChart(sel, cfg) {
   }
 
   const cross = el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, visibility: 'hidden' });
+  /* v8 刷选覆盖层：拖选区间 → 自定义时间窗（与预设窗口互斥，导航栏 chip 可清除） */
+  const selr = el('rect', { y: m.t, height: ih, fill: C.s1, opacity: 0, rx: 3, 'pointer-events': 'none' });
+  svg.append(selr);
   svg.append(cross);
   const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
   hit.style.cursor = cfg.onPick ? 'pointer' : 'crosshair'; hit.tabIndex = 0;
@@ -708,19 +758,41 @@ function lineChart(sel, cfg) {
     });
     tipShow(tt, cx, cy);
   }
+  /* v8 指针分流：短按 = onPick 下钻；拖过 ≥2 日期 = 刷选自定义窗口。
+     pointerup 统一裁决（替代原 click），拖选时抑制十字线与提示框 */
+  const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+  let bx = null;
+  hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
   hit.addEventListener('pointermove', e => {
-    const r = svg.getBoundingClientRect(), sx = (e.clientX - r.left) * W / r.width;
-    const i = Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+    const r = svg.getBoundingClientRect(), i = iOf((e.clientX - r.left) * W / r.width);
+    if (bx != null && Math.abs(e.clientX - bx) > 6) {
+      const i0 = iOf((bx - r.left) * W / r.width);
+      const lo = Math.min(i0, i), hi = Math.max(i0, i);
+      selr.setAttribute('x', X(lo)); selr.setAttribute('width', Math.max(2, X(hi) - X(lo)));
+      selr.setAttribute('opacity', .18);
+      tipHide(); cross.setAttribute('visibility', 'hidden');
+      return;
+    }
     show(i, e.clientX, e.clientY);
   });
   hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tipHide(); });
+  hit.addEventListener('pointerup', e => {
+    const a = bx; bx = null;
+    selr.setAttribute('opacity', 0);
+    if (a != null && Math.abs(e.clientX - a) > 6) {
+      const r = svg.getBoundingClientRect();
+      const i0 = iOf((a - r.left) * W / r.width), i1 = iOf((e.clientX - r.left) * W / r.width);
+      if (i0 !== i1) setCustom(cfg.dates[Math.min(i0, i1)], cfg.dates[Math.max(i0, i1)]);
+      return;
+    }
+    if (cfg.onPick) cfg.onPick(cfg.dates[idx]);
+  });
   hit.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
     if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
     if (e.key === 'Escape') { cross.setAttribute('visibility', 'hidden'); tipHide(); }
     if (e.key === 'Enter' && cfg.onPick) cfg.onPick(cfg.dates[idx]);
   });
-  if (cfg.onPick) hit.addEventListener('click', () => cfg.onPick(cfg.dates[idx]));
   addTable(sel.replace('#c_', '#t_'), cfg.dates, cfg.series, cfg.tipFmt, cfg.head || '');
 }
 
@@ -761,6 +833,10 @@ function colChart(sel, cfg) {
       tipShow(tt, e.clientX, e.clientY);
     });
     hit.addEventListener('pointerleave', tipHide);
+    if (cfg.onPick) {   /* v8 柱图点击日期 → 下钻抽屉 */
+      hit.style.cursor = 'pointer';
+      hit.addEventListener('click', () => cfg.onPick(d));
+    }
     svg.append(hit);
   });
   box.append(svg);
@@ -819,6 +895,8 @@ function stackArea(sel, cfg) {
     svg.append(lp); tops.push({ lp, si });
   });
   const cross = el('line', { y1: m.t, y2: m.t + ih, stroke: C.axis, 'stroke-width': 1, visibility: 'hidden' });
+  const selr = el('rect', { y: m.t, height: ih, fill: C.s1, opacity: 0, rx: 3, 'pointer-events': 'none' });
+  svg.append(selr);
   svg.append(cross);
   const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
   hit.style.cursor = 'crosshair'; hit.tabIndex = 0;
@@ -838,12 +916,34 @@ function stackArea(sel, cfg) {
     tt.append(tipRow(C.ink3, money(tot), '合计'));
     tipShow(tt, cx, cy);
   }
+  /* v8 与折线图同构的刷选 + 下钻分流 */
+  const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+  let bx = null;
+  hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
   hit.addEventListener('pointermove', e => {
-    const r = svg.getBoundingClientRect(), sx = (e.clientX - r.left) * W / r.width;
-    const i = Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+    const r = svg.getBoundingClientRect(), i = iOf((e.clientX - r.left) * W / r.width);
+    if (bx != null && Math.abs(e.clientX - bx) > 6) {
+      const i0 = iOf((bx - r.left) * W / r.width);
+      const lo = Math.min(i0, i), hi = Math.max(i0, i);
+      selr.setAttribute('x', X(lo)); selr.setAttribute('width', Math.max(2, X(hi) - X(lo)));
+      selr.setAttribute('opacity', .18);
+      tipHide(); cross.setAttribute('visibility', 'hidden');
+      return;
+    }
     show(i, e.clientX, e.clientY);
   });
   hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tipHide(); });
+  hit.addEventListener('pointerup', e => {
+    const a = bx; bx = null;
+    selr.setAttribute('opacity', 0);
+    if (a != null && Math.abs(e.clientX - a) > 6) {
+      const r = svg.getBoundingClientRect();
+      const i0 = iOf((a - r.left) * W / r.width), i1 = iOf((e.clientX - r.left) * W / r.width);
+      if (i0 !== i1) setCustom(cfg.dates[Math.min(i0, i1)], cfg.dates[Math.max(i0, i1)]);
+      return;
+    }
+    if (cfg.onPick) cfg.onPick(cfg.dates[idx]);
+  });
   hit.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
     if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
@@ -1082,6 +1182,8 @@ function qualityStrip(sel, arr) {
       tipShow(t, e.clientX, e.clientY);
     });
     c.addEventListener('pointerleave', tipHide);
+    c.addEventListener('click', () => openDrill(q.d));   /* v8 质量格点击 → 当日下钻 */
+    c.addEventListener('keydown', e => { if (e.key === 'Enter') openDrill(q.d); });
     strip.append(c);
   });
   const lg = legendRow([
@@ -1239,6 +1341,7 @@ function spark(vals, color, w) {
 /* ---------- 窗口与渲染 ---------- */
 const LAUNCH = DATA.launch;
 function sliceDays(days, win) {
+  if (CUST) return days.filter(x => x.d >= CUST.from && x.d <= CUST.to);
   if (win === 'all') return days;
   const last = days[days.length - 1].d;
   if (win === '30') {
@@ -1285,16 +1388,16 @@ function renderKpis(cost, mem, costAll) {
   const tiles = [
     { lb: '累计净收入（仿真）', v: money(totRev), hero: true, color: C.s1,
       d: `订阅 + 购买 · ${mem.length} 天窗口`, spark: mem.map(m => m.net_rev) },
-    { lb: '新增付费会员', v: intc(totMem) + ' 名', color: C.s1,
+    { lb: '新增付费会员', v: intc(totMem) + ' 名', color: C.s1, tab: 'sub',
       d: prevDelta(mem.map(m => m.members)) || '会员系统 · 去重人数',
       spark: mem.map(m => m.members) },
-    { lb: '期末 MRR', v: money(mem[mem.length - 1].mrr), color: C.s1,
+    { lb: '期末 MRR', v: money(mem[mem.length - 1].mrr), color: C.s1, tab: 'sub',
       d: '截至窗口末日', spark: mem.map(m => m.mrr) },
-    { lb: '累计核算积分消耗', v: wan(totCr) + ' 万', color: C.s2,
+    { lb: '累计核算积分消耗', v: wan(totCr) + ' 万', color: C.s2, tab: 'cost',
       d: '购买·订阅·赠送', spark: cost.map(c => c.p_cr + c.s_cr + c.g_cr) },
-    { lb: '订阅收入成本比', v: subCost ? (totRev / subCost).toFixed(1) + ' 倍' : '—', color: C.s1,
+    { lb: '订阅收入成本比', v: subCost ? (totRev / subCost).toFixed(1) + ' 倍' : '—', color: C.s1, tab: 'sub',
       d: '分摊 ' + money(subCost), spark: subRatio },
-    { lb: '购买收入成本比', v: pCost ? (pEq / pCost).toFixed(2) + ' 倍' : '—', color: C.s3,
+    { lb: '购买收入成本比', v: pCost ? (pEq / pCost).toFixed(2) + ' 倍' : '—', color: C.s3, tab: 'buy',
       d: '分摊 ' + money(pCost), spark: pRatio },
   ];
   tiles.forEach(t => {
@@ -1306,6 +1409,13 @@ function renderKpis(cost, mem, costAll) {
       const u = document.createElement('span'); u.className = 'up'; u.textContent = t.d.txt; dd.append(u);
     } else dd.textContent = t.d || '';
     c.append(dd);
+    if (t.tab) {   /* v8 KPI 卡点击跳转对应业务线视图 */
+      c.style.cursor = 'pointer'; c.title = '点击进入对应业务线视图';
+      c.tabIndex = 0; c.setAttribute('role', 'button');
+      const go = () => applyTab(t.tab, true);
+      c.addEventListener('click', go);
+      c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    }
     box.append(c);
     /* 先入 DOM 量得卡内容宽，再按真实宽度画走势线（1:1 不变形） */
     if (t.spark && t.spark.some(x => isFinite(x) && x > 0))
@@ -1333,7 +1443,9 @@ function renderAll(animate) {
   lineChart('#c_rev', { h: 210, dates: mem.map(m => m.d), name: '净收入',
     combo: true, color: C.s1, tickFmt: v => v >= 1000 ? (v / 1000) + 'k' : v,
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
-    notes: WIN !== '30' ? [{ d: LAUNCH, label: '订阅上线' }] : [],
+    onPick: d => openDrill(d),
+    notes: (!CUST && WIN !== '30') || (CUST && CUST.from <= LAUNCH && LAUNCH <= CUST.to)
+      ? [{ d: LAUNCH, label: '订阅上线' }] : [],
     series: [{ name: '净收入（仿真）', color: C.s1, values: mem.map(m => m.net_rev) },
              { name: '7日均线', color: 'var(--s3)', values: maSeries(mem.map(m => m.net_rev), 7) }] });
   colChart('#c_mem', { h: 210, dates: mem.map(m => m.d), name: '新增会员',
@@ -1356,7 +1468,8 @@ function renderAll(animate) {
   /* v7.2 两轨各自自适应刻度：共享 800 刻度曾把购买线 90/46 压成贴线、毛利带碎成细条；
      各自归一到「首日 = 100」后，虚线基准即对照锚点，带色毛利空间在两图都读得出来 */
   const roiBase = { h: 210, band: true, tickFmt: v => v, tipFmt: v => v.toFixed(1), head: '日期',
-    noLegend: true, refLine: 100, refLabel: '首日 = 100', rerender: () => renderAll(false) };
+    noLegend: true, refLine: 100, refLabel: '首日 = 100', onPick: d => openDrill(d),
+    rerender: () => renderAll(false) };
   lineChart('#c_subroi', Object.assign({}, roiBase, {
     dates: subDays.map(c => c.d), name: '订阅ROI指数', key: 'subroi', series: subS, refLabelSide: 'left' }));
   lineChart('#c_proi', Object.assign({}, roiBase, {
@@ -1445,7 +1558,7 @@ function renderAll(animate) {
     ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length), ''] ]);
   const kfmt = v => v >= 1000 ? (v / 1000) + 'k' : v;
   lineChart('#c_subprofit', { h: 210, dates: sbD.map(c => c.d), name: '订阅毛利',
-    combo: true, color: C.s3, tickFmt: kfmt,
+    combo: true, color: C.s3, tickFmt: kfmt, onPick: d => openDrill(d),
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '订阅毛利（仿真）', color: C.s3, values: sbP },
              { name: '7日均线', color: 'var(--s1)', values: maSeries(sbP, 7) }] });
@@ -1456,11 +1569,11 @@ function renderAll(animate) {
       values: sbD.map(c => { const r = srcByD[c.d]; const tot = r ? r.s.reduce((a, b) => a + b, 0) : 0;
         return r ? c.s_cost * r.s[i] / Math.max(tot, 1e-9) : 0; }) })) });
   lineChart('#c_submrr', { h: 210, dates: memL.map(m2 => m2.d), name: '期末 MRR',
-    stats: false, area: true, color: C.s1, tickFmt: kfmt,
+    stats: false, area: true, color: C.s1, tickFmt: kfmt, onPick: d => openDrill(d),
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '期末 MRR', color: C.s1, values: mrrL }] });
   lineChart('#c_submem', { h: 210, dates: memL.map(m2 => m2.d), name: '新增付费会员',
-    combo: true, color: C.s1, tickFmt: v => v, tipFmt: v => intc(v) + ' 名',
+    combo: true, color: C.s1, tickFmt: v => v, tipFmt: v => intc(v) + ' 名', onPick: d => openDrill(d),
     endFmt: v => intc(v), head: '日期',
     series: [{ name: '新增付费会员（仿真）', color: C.s1, values: memL.map(m2 => m2.members) },
              { name: '7日均线', color: 'var(--s3)', values: maSeries(memL.map(m2 => m2.members), 7) }] });
@@ -1470,6 +1583,7 @@ function renderAll(animate) {
   const arpu = memL.map(m2 => m2.mrr / Math.max(1, m2.members));
   lineChart('#c_arpu', { h: 210, dates: memL.map(m2 => m2.d), name: '新增会员人均 MRR',
     color: C.s3, tickFmt: v => '$' + v, tipFmt: v => '$' + v.toFixed(2), endFmt: v => '$' + v.toFixed(2),
+    onPick: d => openDrill(d),
     head: '日期', series: [{ name: '人均 MRR（新增会员口径）', color: C.s3, values: arpu }] });
   stackArea('#c_revmix', { h: 210, dates: sbD.map(c => c.d), name: '双轨收入构成',
     series: [{ name: '订阅收入', color: 'var(--s1)', values: sbR },
@@ -1488,7 +1602,7 @@ function renderAll(animate) {
     ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length), ''] ]);
   const kfmt2 = v => v >= 1000 ? (v / 1000) + 'k' : v;
   lineChart('#c_buyeq', { h: 210, dates: cost.map(c => c.d), name: '购买收入 vs 成本',
-    combo: true, color: C.s3, tickFmt: kfmt2,
+    combo: true, color: C.s3, tickFmt: kfmt2, onPick: d => openDrill(d),
     tipFmt: v => money(v), endFmt: v => money(v), head: '日期',
     series: [{ name: '等效金额（仿真）', color: C.s3, values: bEq },
              { name: '分摊成本', color: C.s2, values: bCs }] });
@@ -1498,6 +1612,7 @@ function renderAll(animate) {
   const bRatio = bEq.map((v, i) => v / Math.max(1, bCs[i]));
   lineChart('#c_buyratio', { h: 210, dates: cost.map(c => c.d), name: '购买收入成本比',
     color: C.s3, tickFmt: v => v, tipFmt: v => v.toFixed(2) + '×', endFmt: v => v.toFixed(2) + '×',
+    onPick: d => openDrill(d),
     head: '日期', refLine: 1, refLabel: '盈亏线 1.0',
     series: [{ name: '收入成本比', color: C.s3, values: bRatio }] });
 
@@ -1563,9 +1678,114 @@ function c2rev(costAll, d) {
   return DATA.mem.find(m => m.d === d)?.net_rev || 0;
 }
 
+/* ---------- v8 日期下钻抽屉：任意图表点击日期 → 当日全量拆解 ---------- */
+const ALLD = DATA.mem.map(m2 => m2.d);
+const dCost = {}, dMem = {}, dSrc = {}, dQual = {}, dUnit = {};
+DATA.cost.forEach(c => { dCost[c.d] = c; });
+DATA.mem.forEach(m2 => { dMem[m2.d] = m2; });
+DATA.src_daily.forEach(r => { dSrc[r.d] = r; });
+(DATA.quality || []).forEach(q => { dQual[q.d] = q; });
+DATA.unit_parts.forEach(u => { dUnit[u.d] = u; });
+const drill = $('#drill'), ovl = $('#ovl');
+let DRILLD = null, LASTFOCUS = null;
+function dlFmt(cur, prev) {
+  if (!isFinite(cur) || !isFinite(prev) || prev === 0 || cur === prev) return ['±0%', 'eq'];
+  const pct = (cur / prev - 1) * 100;
+  return [(pct > 0 ? '+' : '') + pct.toFixed(1) + '%', pct > 0 ? 'up' : 'dn'];
+}
+function kvRow(label, val, dl) {
+  const r = div('kv');
+  const k = document.createElement('span'); k.className = 'k2'; k.textContent = label;
+  const v = document.createElement('span'); v.className = 'v2'; v.textContent = val;
+  r.append(k, v);
+  if (dl) { const s = document.createElement('span'); s.className = 'dl ' + dl[1]; s.textContent = dl[0]; r.append(s); }
+  return r;
+}
+function dSec(t) { const s = div('dsec'); s.textContent = t; return s; }
+function renderDrillDay() {
+  const d = DRILLD, i = ALLD.indexOf(d);
+  const c = dCost[d] || {}, m2 = dMem[d] || {};
+  const c0 = dCost[ALLD[i - 1]] || {}, m0 = dMem[ALLD[i - 1]] || {};
+  $('#ddate').textContent = d;
+  $('#dPrev').disabled = i <= 0;
+  $('#dNext').disabled = i >= ALLD.length - 1;
+  const b = $('#dbody'); b.textContent = '';
+  b.append(dSec('收入'));
+  b.append(kvRow('净收入', money(m2.net_rev || 0), dlFmt(m2.net_rev || 0, m0.net_rev || 0)));
+  b.append(kvRow('购买等效', money((c.p_cr || 0) * 100), dlFmt((c.p_cr || 0) * 100, (c0.p_cr || 0) * 100)));
+  b.append(kvRow('赠送积分等效', money(c.g_cr || 0), dlFmt(c.g_cr || 0, c0.g_cr || 0)));
+  b.append(dSec('会员'));
+  b.append(kvRow('新增付费会员', intc(m2.members || 0) + ' 名', dlFmt(m2.members || 0, m0.members || 0)));
+  b.append(kvRow('期末 MRR', money(m2.mrr || 0), dlFmt(m2.mrr || 0, m0.mrr || 0)));
+  b.append(dSec('成本分摊'));
+  const tc = (c.s_cost || 0) + (c.p_cost || 0), tc0 = (c0.s_cost || 0) + (c0.p_cost || 0);
+  b.append(kvRow('分摊合计', money(tc), dlFmt(tc, tc0)));
+  b.append(kvRow('订阅分摊', money(c.s_cost || 0)));
+  b.append(kvRow('购买分摊', money(c.p_cost || 0)));
+  const up = dUnit[d];
+  if (up) b.append(kvRow('单位积分成本', '$' + up.parts.reduce((a, p) => a + p.v, 0).toFixed(2) + ' / 万积分'));
+  const sr = dSrc[d];
+  if (sr) {
+    b.append(dSec('成本四来源'));
+    const tot = sr.s.reduce((a, x) => a + x, 0) || 1;
+    DATA.src_names.forEach((nm, k) =>
+      b.append(kvRow(nm, money(sr.s[k]), [Math.round(sr.s[k] / tot * 100) + '%', 'eq'])));
+  }
+  const q = dQual[d];
+  if (q) { b.append(dSec('数据质量')); b.append(kvRow('当日校验', q.note || q.st)); }
+  const f = div('dfoot');
+  f.textContent = '环比基期为前一日 · 全部数值为仿真数据 · 在任一时间序列图上左右拖选可自定义窗口，Esc 关闭本面板';
+  b.append(f);
+}
+function openDrill(d) {
+  if (!dMem[d] && !dCost[d]) return;
+  DRILLD = d;
+  LASTFOCUS = document.activeElement;
+  renderDrillDay();
+  drill.classList.add('on'); ovl.classList.add('on');
+  drill.setAttribute('aria-hidden', 'false');
+  $('#dclose').focus();
+}
+function closeDrill() {
+  if (!DRILLD) return;
+  DRILLD = null;
+  drill.classList.remove('on'); ovl.classList.remove('on');
+  drill.setAttribute('aria-hidden', 'true');
+  tipHide();
+  if (LASTFOCUS && LASTFOCUS.focus) LASTFOCUS.focus();
+}
+$('#dclose').addEventListener('click', closeDrill);
+ovl.addEventListener('click', closeDrill);
+$('#dPrev').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i > 0) { DRILLD = ALLD[i - 1]; renderDrillDay(); } });
+$('#dNext').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i < ALLD.length - 1) { DRILLD = ALLD[i + 1]; renderDrillDay(); } });
+addEventListener('keydown', e => { if (e.key === 'Escape') closeDrill(); });
+
+/* ---------- v8 刷选：图表拖选 → 自定义时间窗（与预设互斥，chip 可清除） ---------- */
+function setCustom(a, b) {
+  if (!a || !b) return;   /* 空参守卫：刷选路径有 i0!==i1 保证，这里只防异常调用 */
+  const lo = a < b ? a : b, hi = a < b ? b : a;
+  CUST = { from: lo, to: hi };
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+  $('#custTxt').textContent = md(lo) + ' – ' + md(hi);
+  $('#custChip').hidden = false;
+  PICKD = null; renderAll(true);
+}
+function clearCustom() {
+  CUST = null;
+  $('#custChip').hidden = true;
+  const b = document.querySelector('.seg button[data-win="' + WIN + '"]');
+  if (b) b.setAttribute('aria-pressed', 'true');
+  renderAll(true);
+}
+$('#custX').addEventListener('click', clearCustom);
+/* 测试钩子：DOM probe 以编程方式驱动交互态截图 */
+window.__openDrill = openDrill; window.__closeDrill = closeDrill;
+window.__setCustom = setCustom; window.__clearCustom = clearCustom;
+
 /* ---------- 筛选与主题 ---------- */
 document.querySelectorAll('.seg button').forEach(b => {
   b.addEventListener('click', () => {
+    CUST = null; $('#custChip').hidden = true;
     document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', 'true');
     WIN = b.dataset.win; PICKD = null; renderAll(true);
