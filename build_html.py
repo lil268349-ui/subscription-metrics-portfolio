@@ -1488,19 +1488,22 @@ function renderKpis(cost, mem, costAll) {
   const subRatio = cost.filter(c => c.d >= LAUNCH && c.s_cost > 0)
     .map(c => c2rev(costAll, c.d) / c.s_cost);
   const pRatio = cost.filter(c => c.p_cost > 0).map(c => c.p_cr * 100 / c.p_cost);
+  /* v8.8 KPI 迷你走势线统一弱中性色：六卡并排各自实体色（蓝/蓝/蓝/橙/蓝/青绿）
+     读起来就是"一排折线有的蓝有的橙有的绿"；迷你线只承载形状，颜色编码留给主图，
+     实体归属由卡标题文字表达（点击进对应业务线视图，主图里仍是实体色） */
   const tiles = [
-    { lb: '累计净收入（仿真）', v: money(totRev), hero: true, color: C.s1,
+    { lb: '累计净收入（仿真）', v: money(totRev), hero: true, color: C.ink3,
       d: `订阅 + 购买 · ${mem.length} 天窗口`, spark: mem.map(m => m.net_rev) },
-    { lb: '新增付费会员', v: intc(totMem) + ' 名', color: C.s1, tab: 'sub',
+    { lb: '新增付费会员', v: intc(totMem) + ' 名', color: C.ink3, tab: 'sub',
       d: prevDelta(mem.map(m => m.members)) || '会员系统 · 去重人数',
       spark: mem.map(m => m.members) },
-    { lb: '期末 MRR', v: money(mem[mem.length - 1].mrr), color: C.s1, tab: 'sub',
+    { lb: '期末 MRR', v: money(mem[mem.length - 1].mrr), color: C.ink3, tab: 'sub',
       d: '截至窗口末日', spark: mem.map(m => m.mrr) },
-    { lb: '累计核算积分消耗', v: wan(totCr) + ' 万', color: C.s2, tab: 'cost',
+    { lb: '累计核算积分消耗', v: wan(totCr) + ' 万', color: C.ink3, tab: 'cost',
       d: '购买·订阅·赠送', spark: cost.map(c => c.p_cr + c.s_cr + c.g_cr) },
-    { lb: '订阅收入成本比', v: subCost ? (totRev / subCost).toFixed(1) + ' 倍' : '—', color: C.s1, tab: 'sub',
+    { lb: '订阅收入成本比', v: subCost ? (totRev / subCost).toFixed(1) + ' 倍' : '—', color: C.ink3, tab: 'sub',
       d: '分摊 ' + money(subCost), spark: subRatio },
-    { lb: '购买收入成本比', v: pCost ? (pEq / pCost).toFixed(2) + ' 倍' : '—', color: C.s3, tab: 'buy',
+    { lb: '购买收入成本比', v: pCost ? (pEq / pCost).toFixed(2) + ' 倍' : '—', color: C.ink3, tab: 'buy',
       d: '分摊 ' + money(pCost), spark: pRatio },
   ];
   tiles.forEach(t => {
