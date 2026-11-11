@@ -773,6 +773,7 @@ function lineChart(sel, cfg) {
   /* v8 指针分流：短按 = onPick 下钻；拖过 ≥2 日期 = 刷选自定义窗口。
      pointerup 统一裁决（替代原 click），拖选时抑制十字线与提示框 */
   const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+  hit.style.touchAction = 'pan-y';   /* 横向手势留给刷选，纵向滚动还给页面（移动端） */
   let bx = null;
   hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
   hit.addEventListener('pointermove', e => {
@@ -930,6 +931,7 @@ function stackArea(sel, cfg) {
   }
   /* v8 与折线图同构的刷选 + 下钻分流 */
   const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
+  hit.style.touchAction = 'pan-y';   /* 横向手势留给刷选，纵向滚动还给页面（移动端） */
   let bx = null;
   hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
   hit.addEventListener('pointermove', e => {
@@ -1770,7 +1772,18 @@ $('#dclose').addEventListener('click', closeDrill);
 ovl.addEventListener('click', closeDrill);
 $('#dPrev').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i > 0) { DRILLD = ALLD[i - 1]; renderDrillDay(); } });
 $('#dNext').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i < ALLD.length - 1) { DRILLD = ALLD[i + 1]; renderDrillDay(); } });
-addEventListener('keydown', e => { if (e.key === 'Escape') closeDrill(); });
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDrill(); return; }
+  if (!drill.classList.contains('on')) return;
+  if (e.key === 'ArrowLeft') { $('#dPrev').click(); e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { $('#dNext').click(); e.preventDefault(); }
+  else if (e.key === 'Tab') {   /* 焦点陷阱：Tab/Shift+Tab 循环停留在抽屉三按钮内 */
+    const f = [$('#dPrev'), $('#dNext'), $('#dclose')];
+    const i = f.indexOf(document.activeElement);
+    e.preventDefault();
+    f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+  }
+});
 
 /* ---------- v8 刷选：图表拖选 → 自定义时间窗（与预设互斥，chip 可清除） ---------- */
 function setCustom(a, b) {
