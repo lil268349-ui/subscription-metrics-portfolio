@@ -113,8 +113,6 @@
     border:1px solid var(--glass-bd); background:var(--glass); border-radius:9px;
     font-size:12px; color:var(--ink-3); }
   .kchips .kc b { font-size:14px; font-weight:650; color:var(--ink-1); font-variant-numeric:tabular-nums; }
-  .kchips .kc b.pos { color:var(--s3); }
-  .kchips .kc b.neg { color:var(--s2); }
 
   /* ---------- v4.2 图下统计条 + 紧凑明细表 ---------- */
   .cstats { display:flex; gap:10px; flex-wrap:wrap; font-size:11px; color:var(--ink-3);
@@ -1064,9 +1062,11 @@ function stackArea(sel, cfg) {
 /* ---------- v5 tab 内 KPI chips 行 ---------- */
 function chipRow(sel, items) {
   const w = $(sel); if (!w) return; w.textContent = '';
-  items.forEach(([k, v, cls]) => {
+  /* v8.6 数值统一正文色：水平值不上状态色（绿/白混排读起来像渲染不一致，
+     且「人均 MRR 贡献」恒 pos 使绿色语义失效）；带方向的环比色只留给抽屉 delta 列 */
+  items.forEach(([k, v]) => {
     const c = div('kc'); const lab = document.createElement('span'); lab.textContent = k;
-    const b = document.createElement('b'); if (cls) b.className = cls; b.textContent = v;
+    const b = document.createElement('b'); b.textContent = v;
     c.append(lab, b); w.append(c);
   });
 }
@@ -1631,7 +1631,7 @@ function renderAll(animate) {
   chipRow('#costChips', [
     ['总成本', money(tot4), ''],
     ...DATA.src_names.map((nm, i) => [nm, money(st4[i]) + ' · ' + (tot4 ? Math.round(st4[i] / tot4 * 100) : 0) + '%', '']),
-    ['校验通过', intc(qAll.filter(q => q.st === 'ok').length) + ' / ' + intc(qAll.length), 'pos'] ]);
+    ['校验通过', intc(qAll.filter(q => q.st === 'ok').length) + ' / ' + intc(qAll.length)] ]);
 
   /* v5/v6 订阅线 tab：chips + 6 图 */
   const sbD = cost.filter(c => c.d >= LAUNCH);
@@ -1643,13 +1643,13 @@ function renderAll(animate) {
   const sumR = sbR.reduce((a, b) => a + b, 0), sumC = sbC.reduce((a, b) => a + b, 0);
   const sumP = sbP.reduce((a, b) => a + b, 0);
   chipRow('#subChips', [
-    ['订阅收入', money(sumR), ''], ['分摊成本', money(sumC), ''],
-    ['收入成本比', (sumR / Math.max(1, sumC)).toFixed(2) + '×', sumR >= sumC ? 'pos' : 'neg'],
-    ['毛利合计', money(sumP), sumP >= 0 ? 'pos' : 'neg'],
-    ['期末 MRR', money(memL[memL.length - 1].mrr), ''],
-    ['付费会员', intc(memL[memL.length - 1].members) + ' 名', ''],
-    ['人均 MRR 贡献', '$' + (memL[memL.length - 1].mrr / Math.max(1, memL[memL.length - 1].members)).toFixed(1), 'pos'],
-    ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length), ''] ]);
+    ['订阅收入', money(sumR)], ['分摊成本', money(sumC)],
+    ['收入成本比', (sumR / Math.max(1, sumC)).toFixed(2) + '×'],
+    ['毛利合计', money(sumP)],
+    ['期末 MRR', money(memL[memL.length - 1].mrr)],
+    ['付费会员', intc(memL[memL.length - 1].members) + ' 名'],
+    ['人均 MRR 贡献', '$' + (memL[memL.length - 1].mrr / Math.max(1, memL[memL.length - 1].members)).toFixed(1)],
+    ['有收入天数', intc(sbR.filter(v => v > 0).length) + ' / ' + intc(sbD.length)] ]);
   const kfmt = v => v >= 1000 ? (v / 1000) + 'k' : v;
   lineChart('#c_subprofit', { h: 210, dates: sbD.map(c => c.d), name: '订阅毛利',
     combo: true, color: C.s3, tickFmt: kfmt, onPick: d => openDrill(d),
@@ -1690,11 +1690,11 @@ function renderAll(animate) {
   const sumBE = bEq.reduce((a, b) => a + b, 0), sumBC = bCs.reduce((a, b) => a + b, 0);
   const sumPC = cost.reduce((a, c) => a + c.p_cr, 0);
   chipRow('#buyChips', [
-    ['等效金额', money(sumBE), ''], ['分摊成本', money(sumBC), ''],
-    ['收入成本比', (sumBE / Math.max(1, sumBC)).toFixed(2) + '×', sumBE >= sumBC ? 'pos' : 'neg'],
-    ['单位积分成本', '$' + (sumBC / Math.max(1, sumPC)).toFixed(2), ''],
-    ['购买消耗', wan(sumPC) + ' 万积分', ''],
-    ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length), ''] ]);
+    ['等效金额', money(sumBE)], ['分摊成本', money(sumBC)],
+    ['收入成本比', (sumBE / Math.max(1, sumBC)).toFixed(2) + '×'],
+    ['单位积分成本', '$' + (sumBC / Math.max(1, sumPC)).toFixed(2)],
+    ['购买消耗', wan(sumPC) + ' 万积分'],
+    ['覆盖天数', intc(cost.filter(c => c.p_cr > 0).length) + ' / ' + intc(cost.length)] ]);
   const kfmt2 = v => v >= 1000 ? (v / 1000) + 'k' : v;
   lineChart('#c_buyeq', { h: 210, dates: cost.map(c => c.d), name: '购买收入 vs 成本',
     combo: true, color: C.s3, tickFmt: kfmt2, onPick: d => openDrill(d),
