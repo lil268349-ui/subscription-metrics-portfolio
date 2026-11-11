@@ -87,7 +87,9 @@
   /* ---------- KPI ---------- */
   .kpis { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; margin-top:10px; }
   @media (max-width:1020px){ .kpis{grid-template-columns:repeat(2,1fr);} .tile.khero{grid-column:span 2;} }
-  @media (max-width:560px){ .kpis{grid-template-columns:1fr;} .tile.khero{grid-column:span 1;} }
+  @media (max-width:560px){ .kpis{grid-template-columns:1fr;} .tile.khero{grid-column:span 1;}
+    /* v8.2 移动端专审：窄屏触达目标加高（tab 胶囊/窗口切换 ≥36px，拇指可点） */
+    .navbar a[data-tab]{padding:8px 14px;} .seg button{padding:8px 13px;} }
   .tile { background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:10px 11px; }
   .tile .lb { font-size:12px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tile .v { font-size:19px; font-weight:650; margin:3px 0 1px; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
@@ -585,6 +587,49 @@ function statChips(vs, fmt) {
   return st;
 }
 
+/* ---------- v8.2 刷选/下钻分流（折线图与堆叠面积图共用） ----------
+   短按 = onPick 下钻；拖过 ≥6px = 刷选自定义窗口。pointerup 统一裁决（替代原 click），
+   拖选时抑制十字线与提示框。o = { W,m,iw,n,X,dates,selr,cross,show,getIdx,onPick } */
+function attachBrush(hit, svg, o) {
+  const iOf = sx => Math.max(0, Math.min(o.n - 1, Math.round((sx - o.m.l) / (o.iw / (o.n - 1 || 1)))));
+  const sxOf = (clientX, r) => (clientX - r.left) * o.W / r.width;
+  hit.style.touchAction = 'pan-y';   /* 横向手势留给刷选，纵向滚动还给页面（移动端） */
+  let bx = null;
+  hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
+  hit.addEventListener('pointermove', e => {
+    const r = svg.getBoundingClientRect(), i = iOf(sxOf(e.clientX, r));
+    if (bx != null && Math.abs(e.clientX - bx) > 6) {
+      const i0 = iOf(sxOf(bx, r));
+      const lo = Math.min(i0, i), hi = Math.max(i0, i);
+      o.selr.setAttribute('x', o.X(lo)); o.selr.setAttribute('width', Math.max(2, o.X(hi) - o.X(lo)));
+      o.selr.setAttribute('opacity', .18);
+      tipHide(); o.cross.setAttribute('visibility', 'hidden');
+      return;
+    }
+    o.show(i, e.clientX, e.clientY);
+  });
+  hit.addEventListener('pointerleave', () => { o.cross.setAttribute('visibility', 'hidden'); tipHide(); });
+  hit.addEventListener('pointerup', e => {
+    const a = bx; bx = null;
+    o.selr.setAttribute('opacity', 0);
+    if (a != null && Math.abs(e.clientX - a) > 6) {
+      const r = svg.getBoundingClientRect();
+      const i0 = iOf(sxOf(a, r)), i1 = iOf(sxOf(e.clientX, r));
+      if (i0 !== i1) setCustom(o.dates[Math.min(i0, i1)], o.dates[Math.max(i0, i1)]);
+      return;
+    }
+    /* v8.2 修复：tap（触摸屏常见 down+up 无 move）不会经过 show()，闭包 idx 仍是末日——
+       短按下钻一律按事件坐标换算日期，键盘 Enter 路径才用键盘导航的 idx */
+    if (o.onPick) o.onPick(iOf(sxOf(e.clientX, svg.getBoundingClientRect())));
+  });
+  hit.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { o.show(Math.max(0, o.getIdx() - 1), innerWidth / 2, 120); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { o.show(Math.min(o.n - 1, o.getIdx() + 1), innerWidth / 2, 120); e.preventDefault(); }
+    if (e.key === 'Escape') { o.cross.setAttribute('visibility', 'hidden'); tipHide(); }
+    if (e.key === 'Enter' && o.onPick) o.onPick(o.getIdx());
+  });
+}
+
 /* ---------- 折线图（支持多序列 / 面积 / 竖线标注 / 十字线悬浮） ---------- */
 function lineChart(sel, cfg) {
   const box = $(sel); box.textContent = '';
@@ -715,6 +760,8 @@ function lineChart(sel, cfg) {
   const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
   hit.style.cursor = cfg.onPick ? 'pointer' : 'crosshair'; hit.tabIndex = 0;
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '折线图');
+  hit.setAttribute('data-hit', '1');   /* v8.2 游标定位锚点：drawDrillCursor 从这里读绘图区几何 */
+  svg.__dates = cfg.dates;             /* v8.2 游标按日期反查 index，翻日/重渲染都不失效 */
   svg.append(hit);
 
   if (cfg.series.length >= 2 && !cfg.noLegend) {
@@ -758,42 +805,10 @@ function lineChart(sel, cfg) {
     });
     tipShow(tt, cx, cy);
   }
-  /* v8 指针分流：短按 = onPick 下钻；拖过 ≥2 日期 = 刷选自定义窗口。
-     pointerup 统一裁决（替代原 click），拖选时抑制十字线与提示框 */
-  const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
-  hit.style.touchAction = 'pan-y';   /* 横向手势留给刷选，纵向滚动还给页面（移动端） */
-  let bx = null;
-  hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
-  hit.addEventListener('pointermove', e => {
-    const r = svg.getBoundingClientRect(), i = iOf((e.clientX - r.left) * W / r.width);
-    if (bx != null && Math.abs(e.clientX - bx) > 6) {
-      const i0 = iOf((bx - r.left) * W / r.width);
-      const lo = Math.min(i0, i), hi = Math.max(i0, i);
-      selr.setAttribute('x', X(lo)); selr.setAttribute('width', Math.max(2, X(hi) - X(lo)));
-      selr.setAttribute('opacity', .18);
-      tipHide(); cross.setAttribute('visibility', 'hidden');
-      return;
-    }
-    show(i, e.clientX, e.clientY);
-  });
-  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tipHide(); });
-  hit.addEventListener('pointerup', e => {
-    const a = bx; bx = null;
-    selr.setAttribute('opacity', 0);
-    if (a != null && Math.abs(e.clientX - a) > 6) {
-      const r = svg.getBoundingClientRect();
-      const i0 = iOf((a - r.left) * W / r.width), i1 = iOf((e.clientX - r.left) * W / r.width);
-      if (i0 !== i1) setCustom(cfg.dates[Math.min(i0, i1)], cfg.dates[Math.max(i0, i1)]);
-      return;
-    }
-    if (cfg.onPick) cfg.onPick(cfg.dates[idx]);
-  });
-  hit.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
-    if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
-    if (e.key === 'Escape') { cross.setAttribute('visibility', 'hidden'); tipHide(); }
-    if (e.key === 'Enter' && cfg.onPick) cfg.onPick(cfg.dates[idx]);
-  });
+  /* v8.2 下钻分流：firePick 记下触发图（LASTPICK 供 openDrill 挂当日游标），再走 onPick */
+  const firePick = i2 => { LASTPICK = sel; if (cfg.onPick) cfg.onPick(cfg.dates[i2]); };
+  attachBrush(hit, svg, { W, m, iw, n, X, dates: cfg.dates, selr, cross,
+    show, getIdx: () => idx, onPick: firePick });
   addTable(sel.replace('#c_', '#t_'), cfg.dates, cfg.series, cfg.tipFmt, cfg.head || '');
 }
 
@@ -834,9 +849,9 @@ function colChart(sel, cfg) {
       tipShow(tt, e.clientX, e.clientY);
     });
     hit.addEventListener('pointerleave', tipHide);
-    if (cfg.onPick) {   /* v8 柱图点击日期 → 下钻抽屉 */
+    if (cfg.onPick) {   /* v8 柱图点击日期 → 下钻抽屉（LASTPICK 供当日游标定位触发图） */
       hit.style.cursor = 'pointer';
-      hit.addEventListener('click', () => cfg.onPick(d));
+      hit.addEventListener('click', () => { LASTPICK = sel; cfg.onPick(d); });
     }
     svg.append(hit);
   });
@@ -902,6 +917,8 @@ function stackArea(sel, cfg) {
   const hit = el('rect', { x: m.l, y: m.t, width: iw, height: ih, fill: 'transparent' });
   hit.style.cursor = 'crosshair'; hit.tabIndex = 0;
   hit.setAttribute('role', 'img'); hit.setAttribute('aria-label', cfg.name || '堆叠面积图');
+  hit.setAttribute('data-hit', '1');   /* v8.2 游标定位锚点：drawDrillCursor 从这里读绘图区几何 */
+  svg.__dates = cfg.dates;             /* v8.2 游标按日期反查 index，翻日/重渲染都不失效 */
   svg.append(hit);
   let idx = n - 1;
   function show(i, cx, cy) {
@@ -917,40 +934,10 @@ function stackArea(sel, cfg) {
     tt.append(tipRow(C.ink3, money(tot), '合计'));
     tipShow(tt, cx, cy);
   }
-  /* v8 与折线图同构的刷选 + 下钻分流 */
-  const iOf = sx => Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (iw / (n - 1 || 1)))));
-  hit.style.touchAction = 'pan-y';   /* 横向手势留给刷选，纵向滚动还给页面（移动端） */
-  let bx = null;
-  hit.addEventListener('pointerdown', e => { bx = e.clientX; try { hit.setPointerCapture(e.pointerId); } catch (_) {} });
-  hit.addEventListener('pointermove', e => {
-    const r = svg.getBoundingClientRect(), i = iOf((e.clientX - r.left) * W / r.width);
-    if (bx != null && Math.abs(e.clientX - bx) > 6) {
-      const i0 = iOf((bx - r.left) * W / r.width);
-      const lo = Math.min(i0, i), hi = Math.max(i0, i);
-      selr.setAttribute('x', X(lo)); selr.setAttribute('width', Math.max(2, X(hi) - X(lo)));
-      selr.setAttribute('opacity', .18);
-      tipHide(); cross.setAttribute('visibility', 'hidden');
-      return;
-    }
-    show(i, e.clientX, e.clientY);
-  });
-  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tipHide(); });
-  hit.addEventListener('pointerup', e => {
-    const a = bx; bx = null;
-    selr.setAttribute('opacity', 0);
-    if (a != null && Math.abs(e.clientX - a) > 6) {
-      const r = svg.getBoundingClientRect();
-      const i0 = iOf((a - r.left) * W / r.width), i1 = iOf((e.clientX - r.left) * W / r.width);
-      if (i0 !== i1) setCustom(cfg.dates[Math.min(i0, i1)], cfg.dates[Math.max(i0, i1)]);
-      return;
-    }
-    if (cfg.onPick) cfg.onPick(cfg.dates[idx]);
-  });
-  hit.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') { show(Math.max(0, idx - 1), innerWidth / 2, 120); e.preventDefault(); }
-    if (e.key === 'ArrowRight') { show(Math.min(n - 1, idx + 1), innerWidth / 2, 120); e.preventDefault(); }
-    if (e.key === 'Escape') { cross.setAttribute('visibility', 'hidden'); tipHide(); }
-  });
+  /* v8.2 与折线图共用 attachBrush（分流逻辑单处实现），firePick 同样记触发图 */
+  const firePick = i2 => { LASTPICK = sel; if (cfg.onPick) cfg.onPick(cfg.dates[i2]); };
+  attachBrush(hit, svg, { W, m, iw, n, X, dates: cfg.dates, selr, cross,
+    show, getIdx: () => idx, onPick: firePick });
   if (cfg.series.length >= 2) {
     const lg = div('legend');
     cfg.series.forEach((s, si) => {
@@ -1620,6 +1607,7 @@ function renderAll(animate) {
 
   CURCOST = cost;
   renderDrill(cost);
+  drawDrillCursor();   /* v8.2 重渲染会重建 SVG，抽屉还开着时把当日游标补回来 */
 }
 function aggFlows(cost, sd) {
   const bkt = ['购买', '订阅', '赠送'];
@@ -1689,7 +1677,7 @@ DATA.src_daily.forEach(r => { dSrc[r.d] = r; });
 (DATA.quality || []).forEach(q => { dQual[q.d] = q; });
 DATA.unit_parts.forEach(u => { dUnit[u.d] = u; });
 const drill = $('#drill'), ovl = $('#ovl');
-let DRILLD = null, LASTFOCUS = null;
+let DRILLD = null, LASTFOCUS = null, DRSRC = null, LASTPICK = null;
 function dlFmt(cur, prev) {
   if (!isFinite(cur) || !isFinite(prev) || prev === 0 || cur === prev) return ['±0%', 'eq'];
   const pct = (cur / prev - 1) * 100;
@@ -1739,18 +1727,42 @@ function renderDrillDay() {
   f.textContent = '环比基期为前一日 · 全部数值为仿真数据 · 在任一时间序列图上左右拖选可自定义窗口，Esc 关闭本面板';
   b.append(f);
 }
+/* ---------- v8.2 当日游标：下钻触发图上高亮当日（竖线 + 顶部圆点），随翻日/重渲染联动 ---------- */
+function clearDrillCursor() {
+  document.querySelectorAll('svg .dcur').forEach(g => g.remove());
+}
+function drawDrillCursor() {
+  clearDrillCursor();
+  if (!DRILLD || !DRSRC) return;
+  const svg = document.querySelector(DRSRC + ' svg');
+  if (!svg || !svg.__dates) return;
+  const i = svg.__dates.indexOf(DRILLD);
+  if (i < 0) return;   /* 触发图的时间轴不含当日（如窗口被改小），不画 */
+  const hr = svg.querySelector('[data-hit]');
+  if (!hr) return;     /* 柱图等无整块 hit 的图安全降级为无游标 */
+  const l = +hr.getAttribute('x'), t = +hr.getAttribute('y');
+  const x = l + i / (svg.__dates.length - 1) * +hr.getAttribute('width');
+  const g = el('g', { 'class': 'dcur' });
+  g.append(el('line', { x1: x, x2: x, y1: t, y2: t + +hr.getAttribute('height'),
+    stroke: C.s1, 'stroke-width': 1.5, opacity: .8 }));
+  g.append(el('circle', { cx: x, cy: t + 2.5, r: 3, fill: C.s1 }));
+  svg.append(g);
+}
 function openDrill(d) {
   if (!dMem[d] && !dCost[d]) return;
   DRILLD = d;
+  DRSRC = LASTPICK;   /* v8.2 记下触发图，游标画在它上面（LASTPICK 由 firePick 维护） */
   LASTFOCUS = document.activeElement;
   renderDrillDay();
+  drawDrillCursor();
   drill.classList.add('on'); ovl.classList.add('on');
   drill.setAttribute('aria-hidden', 'false');
   $('#dclose').focus();
 }
 function closeDrill() {
   if (!DRILLD) return;
-  DRILLD = null;
+  DRILLD = null; DRSRC = null;
+  clearDrillCursor();
   drill.classList.remove('on'); ovl.classList.remove('on');
   drill.setAttribute('aria-hidden', 'true');
   tipHide();
@@ -1758,8 +1770,8 @@ function closeDrill() {
 }
 $('#dclose').addEventListener('click', closeDrill);
 ovl.addEventListener('click', closeDrill);
-$('#dPrev').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i > 0) { DRILLD = ALLD[i - 1]; renderDrillDay(); } });
-$('#dNext').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i < ALLD.length - 1) { DRILLD = ALLD[i + 1]; renderDrillDay(); } });
+$('#dPrev').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i > 0) { DRILLD = ALLD[i - 1]; renderDrillDay(); drawDrillCursor(); } });
+$('#dNext').addEventListener('click', () => { const i = ALLD.indexOf(DRILLD); if (i < ALLD.length - 1) { DRILLD = ALLD[i + 1]; renderDrillDay(); drawDrillCursor(); } });
 addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeDrill(); return; }
   if (!drill.classList.contains('on')) return;
